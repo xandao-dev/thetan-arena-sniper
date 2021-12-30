@@ -23,8 +23,8 @@ async function main() {
 	console.log('My funds: ' + MY_FUNDS_DOLLAR);
 	console.log('Earn expect percentage: ' + EARN_EXPECT_PERCENTAGE);
 
-	await thetanRoutine();
-	await coinPricesRoutine();
+	coinPricesRoutine();
+	thetanRoutine();
 }
 
 async function thetanRoutine() {
