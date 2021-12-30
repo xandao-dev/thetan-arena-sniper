@@ -1,5 +1,16 @@
 {
+  "type": "module",
+  "version": "1.0.0",
+  "author": {
+    "name": "Alexandre Calil Martins Fonseca",
+    "email": "alexandrecalilmf@gmail.com"
+  },
+  "description": "Find the best thetans from Thetan Arena Marketplace",
+  "license": "UNLICENSED",
   "dependencies": {
+    "beepbeep": "^1.3.0",
+    "colors": "^1.4.0",
+    "debounce": "^1.2.1",
     "puppeteer": "^13.0.1"
   }
 }
