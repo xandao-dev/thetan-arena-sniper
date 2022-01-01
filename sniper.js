@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer';
+import axios from 'axios';
 import { setAsyncInterval, clearAsyncInterval } from './asyncInterval.js';
 import { buyThetan, sellThetan } from './tradeThetan.js';
 import colors from 'colors';
@@ -9,13 +10,13 @@ const MY_FUNDS_DOLLAR = parseFloat(process.argv[2]) || 120;
 const WIN_RATE = 0.5;
 const EARN_EXPECT_PERCENTAGE = parseFloat(process.argv[3]) || 0.5;
 const THETAN_RARITY_WIN_REWARDS_PER_BATTLE_THC = [9.25, 12.5, 29.55];
-const FETCH_THETANS = 'https://data.thetanarena.com/thetan/v1/nif/search?sort=Latest&batPercentMin=0&from=0&size=50';
-const FETCH_THETANS_INTERVAL = 2500 + Math.floor(Math.random() * 2001) - 1000;
+const FETCH_THETANS = 'https://data.thetanarena.com/thetan/v1/nif/search?sort=Latest&batPercentMin=0&from=0&size=10';
+const FETCH_THETANS_INTERVAL = 500;
 
 /* Coin Prices Routine Constants */
 const FETCH_THC = 'https://poocoin.app/tokens/0x24802247bd157d771b7effa205237d8e9269ba8a';
 const FETCH_BNB = 'https://poocoin.app/tokens/bnb';
-const FETCH_COINS_INTERVAL = 60000 + Math.floor(Math.random() * 5001) - 2500;
+const FETCH_COINS_INTERVAL = 45000;
 
 let thcPriceDollar = null;
 let bnbPriceDollar = null;
@@ -31,26 +32,18 @@ async function main() {
 async function thetanRoutine() {
 	let lastGoodThetansIds = [];
 
-	async function openThetanMarketplace() {
-		const browser = await puppeteer.launch();
-		const [page] = await browser.pages();
-		await page.setUserAgent(
-			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
-		);
-		await page.goto(FETCH_THETANS, { waitUntil: 'networkidle2' });
-		return page;
-	}
-
-	async function getThetans(page) {
-		await page.reload({ waitUntil: 'networkidle2' });
-		await page.waitForSelector('body > pre');
-		let body = await page.$('body > pre');
-		let data = await page.evaluate((el) => el.innerText, body);
-		data = JSON.parse(data);
-		if (data.success === true) {
-			return data?.data || [];
+	async function getThetans() {
+		try {
+			const response = await axios.get(FETCH_THETANS);
+			if (response.data.success) {
+				return response.data.data;
+			}
+			console.log(`Error fetching thetans`);
+			return [];
+		} catch (error) {
+			console.log(`Error getting thetans: ${error}`);
+			return [];
 		}
-		return [];
 	}
 
 	async function getBestThetans(thetans) {
@@ -134,9 +127,8 @@ async function thetanRoutine() {
 		}
 	}
 
-	const page = await openThetanMarketplace();
 	setAsyncInterval(async () => {
-		const thetans = await getThetans(page);
+		const thetans = await getThetans();
 		const bestThetans = await getBestThetans(thetans);
 		const bestThetansFiltered = await filterAlreadyListedThetans(bestThetans);
 
