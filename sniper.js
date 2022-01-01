@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import { setAsyncInterval, clearAsyncInterval } from './asyncInterval.js';
+import { buyThetan, sellThetan } from './tradeThetan.js';
 import colors from 'colors';
 import beep from 'beepbeep';
 
@@ -63,7 +64,7 @@ async function thetanRoutine() {
 			return [];
 		}
 
-		console.log('Thetans number: ' + bestThetans.length);
+		// console.log('Thetans number: ' + bestThetans.length);
 
 		// Non sold
 		// bestThetans = bestThetans.filter((hero) => hero.onMarketTime !== 0);
@@ -78,22 +79,25 @@ async function thetanRoutine() {
 		// console.log('Thetans number (higher than 50$): ' + bestThetans.length);
 
 		// price lower than MY_FUNDS_DOLLAR
-		bestThetans = bestThetans.filter((hero) => (hero.price / 10e7) * bnbPriceDollar < MY_FUNDS_DOLLAR);
+		bestThetans = bestThetans.filter((hero) => (hero.price / 1e8) * bnbPriceDollar < MY_FUNDS_DOLLAR);
 		console.log(`Thetans number (less than ${MY_FUNDS_DOLLAR}$): ${bestThetans.length}`);
 
 		// earn potential percentage higher than EARN_EXPECT_PERCENTAGE
 		bestThetans = bestThetans.filter((hero, index) => {
 			const earnPotential =
 				hero.battleCap * thcPriceDollar * WIN_RATE * THETAN_RARITY_WIN_REWARDS_PER_BATTLE_THC[hero.heroRarity];
-			const earnRate = (earnPotential * 10e7) / (hero.price * bnbPriceDollar) - 1;
+			const earnRate = (earnPotential * 1e8) / (hero.price * bnbPriceDollar) - 1;
 			if (earnRate >= EARN_EXPECT_PERCENTAGE) {
 				bestThetans[index].earnPotentialDollar = earnPotential.toFixed(2);
 				bestThetans[index].earnRatePercentage = (earnRate * 100).toFixed(2);
-				bestThetans[index].heroPriceDollar = ((hero.price * bnbPriceDollar) / 10e7).toFixed(2);
+				bestThetans[index].heroPriceDollar = ((hero.price * bnbPriceDollar) / 1e8).toFixed(2);
 			}
 			return earnRate >= EARN_EXPECT_PERCENTAGE;
 		});
 		console.log(`Thetans number (good earn potential): ${bestThetans.length}`);
+
+		// Remove unwanted thetans
+		bestThetans = bestThetans.filter((hero) => hero.name !== 'Veinka');
 
 		return bestThetans;
 	}
@@ -123,6 +127,13 @@ async function thetanRoutine() {
 		});
 	}
 
+	async function buyBestThetans(bestThetans) {
+		if (bestThetans.length > 0) {
+			const thetanPrice = (bestThetans[0].price / 1e8) * 1e18;
+			await buyThetan(bestThetans[0].tokenId, bestThetans[0].id, thetanPrice, bestThetans[0].ownerAddress);
+		}
+	}
+
 	const page = await openThetanMarketplace();
 	setAsyncInterval(async () => {
 		const thetans = await getThetans(page);
@@ -132,6 +143,7 @@ async function thetanRoutine() {
 		if (bestThetansFiltered && bestThetansFiltered.length > 0) {
 			beep();
 			logBestThetans(bestThetansFiltered);
+			await buyBestThetans(bestThetansFiltered);
 			lastGoodThetansIds.push(...bestThetansFiltered.map((hero) => hero.id));
 		}
 	}, FETCH_THETANS_INTERVAL);
