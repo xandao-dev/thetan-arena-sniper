@@ -5,9 +5,9 @@ import { setAsyncInterval, clearAsyncInterval } from './asyncInterval.js';
 dotenv.config();
 
 /* Trading Bot Constants */
-const THETAN_HERO_CONTRACT_ADDRESS = '0x98eb46cbf76b19824105dfbcfa80ea8ed020c6f4';
-const THETAN_MARKETPLACE_CONTRACT_ADDRESS = '0x54ac76f9afe0764e6a8ed6c4179730e6c768f01c';
-const THETAN_MARKETPLACE_ABI = [
+const THETAN_HERO_CONTRACT_ADDRESS: string = '0x98eb46cbf76b19824105dfbcfa80ea8ed020c6f4';
+const THETAN_MARKETPLACE_CONTRACT_ADDRESS: string = '0x54ac76f9afe0764e6a8ed6c4179730e6c768f01c';
+const THETAN_MARKETPLACE_ABI: any[] = [
 	{
 		anonymous: false,
 		inputs: [
@@ -166,8 +166,8 @@ const THETAN_MARKETPLACE_ABI = [
 		type: 'function',
 	},
 ];
-const WBNB_CONTRACT_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
-const WBNB_ABI = [
+const WBNB_CONTRACT_ADDRESS: string = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+const WBNB_ABI: any[] = [
 	{
 		constant: true,
 		inputs: [],
@@ -320,16 +320,21 @@ const WBNB_ABI = [
 		type: 'event',
 	},
 ];
-const GAS_LIMIT = 350000; // Got this from thetan marketplace transaction
-const GAS_UNIT_PRICE_GWEI = 6; // 1 gwei = 10^-9 BNB
+const GAS_LIMIT: number = 350000; // Got this from thetan marketplace transaction
+const GAS_UNIT_PRICE_GWEI: number = 6; // 1 gwei = 10^-9 BNB
 
-let marketplaceBearerToken = null;
+if (!process.env.WALLET_PRIVATE_KEY) {
+	throw new Error('WALLET_PRIVATE_KEY not set');
+}
+
+let marketplaceBearerToken: string;
 const web3 = new Web3('https://bsc-dataseed1.binance.org:443');
 const account = web3.eth.accounts.privateKeyToAccount(process.env.WALLET_PRIVATE_KEY);
 web3.eth.accounts.wallet.add(account);
 
 async function checkBnbBalance() {
-	const bnbBalance = (await web3.eth.getBalance(account.address)) / 1e18;
+	const balance = await web3.eth.getBalance(account.address);
+	const bnbBalance = parseInt(balance) / 1e18;
 	if (bnbBalance < GAS_LIMIT * GAS_UNIT_PRICE_GWEI * 1e-9) {
 		console.log('BNB balance is too low to pay the fees');
 		return false;
@@ -337,7 +342,7 @@ async function checkBnbBalance() {
 	return true;
 }
 
-async function checkWbnbBalance(thetanPrice) {
+async function checkWbnbBalance(thetanPrice: BigInt) {
 	const wbnbContract = new web3.eth.Contract(WBNB_ABI, WBNB_CONTRACT_ADDRESS);
 	const wbnbBalance = await wbnbContract.methods.balanceOf(account.address).call();
 
@@ -373,6 +378,10 @@ async function thetanLogin() {
 		return false;
 	}
 	const loginNonce = String(loginNonceReq.data.data.nonce);
+	if (!process.env.WALLET_PRIVATE_KEY) {
+		console.log('WALLET_PRIVATE_KEY not set');
+		return false;
+	}
 	const userSignature = web3.eth.accounts.sign(loginNonce, process.env.WALLET_PRIVATE_KEY).signature;
 
 	const loginReq = await axios({
@@ -399,10 +408,10 @@ async function thetanLogin() {
 		return false;
 	}
 
-	return loginReq.data.data.accessToken;
+	return loginReq.data.data.accessToken || '';
 }
 
-async function getSellerSignature(thetanId, bearerToken) {
+async function getSellerSignature(thetanId: string, bearerToken: string) {
 	const sellerSignatureReq = await axios({
 		url: `https://data.thetanarena.com/thetan/v1/items/${thetanId}/signed-signature?id=${thetanId}`,
 		method: 'GET',
@@ -431,7 +440,7 @@ async function getSellerSignature(thetanId, bearerToken) {
 	return sellerSignatureReq.data.data;
 }
 
-async function buyThetan(thetanId, tokenId, thetanPrice, sellerAddress) {
+async function buyThetan(thetanId: string, tokenId: string, thetanPrice: BigInt, sellerAddress: string) {
 	const isBnbBalanceValid = await checkBnbBalance();
 	if (!isBnbBalanceValid) process.exit();
 	const isWbnbBalanceValid = await checkWbnbBalance(thetanPrice);
@@ -460,13 +469,15 @@ async function buyThetan(thetanId, tokenId, thetanPrice, sellerAddress) {
 	process.exit();
 }
 
-async function sellThetan(thetanId, thetanPrice) {
+async function sellThetan(thetanId: string, thetanPrice: BigInt) {
 	// TODO
 }
 
-marketplaceBearerToken = await thetanLogin();
-setAsyncInterval(async () => {
+(async () => {
 	marketplaceBearerToken = await thetanLogin();
-}, 86400);
+	setAsyncInterval(async () => {
+		marketplaceBearerToken = await thetanLogin();
+	}, 86400);
+})();
 
 export { buyThetan, sellThetan };

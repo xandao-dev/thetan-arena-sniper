@@ -3,6 +3,7 @@ import axios from 'axios';
 import { setAsyncInterval, clearAsyncInterval } from './asyncInterval.js';
 import { buyThetan, sellThetan } from './tradeThetan.js';
 import colors from 'colors';
+// @ts-ignore
 import beep from 'beepbeep';
 
 /* Thetan Routine Constants */
@@ -18,8 +19,8 @@ const FETCH_THC = 'https://poocoin.app/tokens/0x24802247bd157d771b7effa205237d8e
 const FETCH_BNB = 'https://poocoin.app/tokens/bnb';
 const FETCH_COINS_INTERVAL = 45000;
 
-let thcPriceDollar = null;
-let bnbPriceDollar = null;
+let thcPriceDollar: number = 0;
+let bnbPriceDollar: number = 0;
 
 async function main() {
 	console.log('My funds: ' + MY_FUNDS_DOLLAR);
@@ -30,7 +31,7 @@ async function main() {
 }
 
 async function thetanRoutine() {
-	let lastGoodThetansIds = [];
+	let lastGoodThetansIds: any[] = [];
 
 	async function getThetans() {
 		try {
@@ -46,13 +47,13 @@ async function thetanRoutine() {
 		}
 	}
 
-	async function getBestThetans(thetans) {
+	async function getBestThetans(thetans: any[]) {
 		let bestThetans = thetans;
 		if (!bestThetans || bestThetans?.length === 0) {
 			console.log('No thetans found.');
 			return [];
 		}
-		if (thcPriceDollar === null || bnbPriceDollar === null) {
+		if (!thcPriceDollar || !bnbPriceDollar) {
 			console.log('Waiting for coin prices...');
 			return [];
 		}
@@ -95,7 +96,7 @@ async function thetanRoutine() {
 		return bestThetans;
 	}
 
-	function filterAlreadyListedThetans(bestThetans) {
+	function filterAlreadyListedThetans(bestThetans: any[]) {
 		for (let i = 0; i < bestThetans.length; i++) {
 			if (lastGoodThetansIds.includes(bestThetans[i].id)) {
 				bestThetans.splice(i, 1);
@@ -105,9 +106,10 @@ async function thetanRoutine() {
 		return bestThetans;
 	}
 
-	function logBestThetans(bestThetans) {
+	function logBestThetans(bestThetans: any[]) {
 		bestThetans.forEach((hero) => {
 			console.log(
+				// @ts-ignore
 				colors.brightGreen(
 					`${hero.name}(${hero.id.slice(0, 8)}):
 	Current Time: ${new Date(Date.now()).toLocaleString()}
@@ -120,7 +122,7 @@ async function thetanRoutine() {
 		});
 	}
 
-	async function buyBestThetans(bestThetans) {
+	async function buyBestThetans(bestThetans: any[]) {
 		if (bestThetans.length > 0) {
 			const thetanPrice = BigInt((bestThetans[0].price / 1e8) * 1e18);
 			await buyThetan(bestThetans[0].id, bestThetans[0].tokenId, thetanPrice, bestThetans[0].ownerAddress);
@@ -130,7 +132,7 @@ async function thetanRoutine() {
 	setAsyncInterval(async () => {
 		const thetans = await getThetans();
 		const bestThetans = await getBestThetans(thetans);
-		const bestThetansFiltered = await filterAlreadyListedThetans(bestThetans);
+		const bestThetansFiltered = filterAlreadyListedThetans(bestThetans);
 
 		if (bestThetansFiltered && bestThetansFiltered.length > 0) {
 			beep();
@@ -153,16 +155,16 @@ async function coinPricesRoutine() {
 		await page.goto(FETCH_THC);
 		await page.waitForXPath(`.//*[contains(text(), 'Thetan Coin price chart')]`);
 		const titleTHC = await page.title();
-		const thcPrice = parseFloat(titleTHC.split('$')[1]);
-		if (typeof thcPrice !== 'number') thcPrice = null;
+		let thcPrice: number = parseFloat(titleTHC.split('$')[1]);
+		if (!thcPrice) thcPrice = 0;
 		console.log('UPDATE: THC price: ' + thcPrice);
 
 		// Get BNB price
 		await page.goto(FETCH_BNB);
 		await page.waitForXPath(`.//*[contains(text(), 'Wrapped BNB price chart')]`);
 		const titleBNB = await page.title();
-		const bnbPrice = parseFloat(titleBNB.split('$')[1]);
-		if (typeof bnbPrice !== 'number') bnbPrice = null;
+		let bnbPrice: any = parseFloat(titleBNB.split('$')[1]);
+		if (!bnbPrice) bnbPrice = 0;
 		console.log('UPDATE: BNB price: ' + bnbPrice);
 
 		await page.close();
@@ -178,7 +180,7 @@ async function coinPricesRoutine() {
 try {
 	main();
 } catch (e) {
-	console.error(e.message);
+	console.error((e as Error).message);
 	console.log('restarting...');
 	main();
 }

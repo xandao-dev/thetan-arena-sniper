@@ -1,12 +1,12 @@
-const asyncIntervals = [];
-const runAsyncInterval = async (cb, interval, intervalIndex) => {
+const asyncIntervals: boolean[] = [];
+const runAsyncInterval = async (cb: Function, interval: number, intervalIndex: number) => {
 	await cb();
 	if (asyncIntervals[intervalIndex]) {
 		setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval);
 	}
 };
 
-const setAsyncInterval = (cb, interval) => {
+const setAsyncInterval = (cb: Function, interval: number) => {
 	if (cb && typeof cb === 'function') {
 		const intervalIndex = asyncIntervals.length;
 		asyncIntervals.push(true);
@@ -17,7 +17,7 @@ const setAsyncInterval = (cb, interval) => {
 	}
 };
 
-const clearAsyncInterval = (intervalIndex) => {
+const clearAsyncInterval = (intervalIndex: number) => {
 	if (asyncIntervals[intervalIndex]) {
 		asyncIntervals[intervalIndex] = false;
 	}
