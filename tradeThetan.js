@@ -1,5 +1,7 @@
 import Web3 from 'web3';
 import dotenv from 'dotenv';
+import axios from 'axios';
+import { setAsyncInterval, clearAsyncInterval } from './asyncInterval.js';
 dotenv.config();
 
 /* Trading Bot Constants */
@@ -318,16 +320,16 @@ const WBNB_ABI = [
 		type: 'event',
 	},
 ];
-
 const GAS_LIMIT = 350000; // Got this from thetan marketplace transaction
 const GAS_UNIT_PRICE_GWEI = 6; // 1 gwei = 10^-9 BNB
 
+let marketplaceBearerToken = null;
 const web3 = new Web3('https://bsc-dataseed1.binance.org:443');
 const account = web3.eth.accounts.privateKeyToAccount(process.env.WALLET_PRIVATE_KEY);
 web3.eth.accounts.wallet.add(account);
 
 async function checkBnbBalance() {
-	const bnbBalance = (await web3.eth.getBalance(process.env.WALLET_ADDRESS)) / 1e18;
+	const bnbBalance = (await web3.eth.getBalance(account.address)) / 1e18;
 	if (bnbBalance < GAS_LIMIT * GAS_UNIT_PRICE_GWEI * 1e-9) {
 		console.log('BNB balance is too low to pay the fees');
 		return false;
@@ -337,9 +339,8 @@ async function checkBnbBalance() {
 
 async function checkWbnbBalance(thetanPrice) {
 	const wbnbContract = new web3.eth.Contract(WBNB_ABI, WBNB_CONTRACT_ADDRESS);
-	const wbnbBalance = await wbnbContract.methods.balanceOf(process.env.WALLET_ADDRESS).call();
-	console.log(`WBNB balance: ${wbnbBalance / 1e18}`);
-	console.log(`Thetan price: ${thetanPrice / 1e18}`);
+	const wbnbBalance = await wbnbContract.methods.balanceOf(account.address).call();
+
 	if (wbnbBalance < thetanPrice) {
 		console.log('WBNB balance is too low');
 		return false;
@@ -347,26 +348,114 @@ async function checkWbnbBalance(thetanPrice) {
 	return true;
 }
 
-async function buyThetan(thetanId, thetanPrice, sellerAddress) {
+async function thetanLogin() {
+	const loginNonceReq = await axios({
+		url: `https://data.thetanarena.com/thetan/v1/authentication/nonce?Address=${account.address}`,
+		method: 'GET',
+		headers: {
+			Accept: 'application/json',
+			'accept-language': 'en-US,en;q=0.9',
+			'cache-control': 'max-age=0',
+			'content-type': 'application/json',
+			'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
+			'sec-ch-ua-mobile': '?0',
+			'sec-ch-ua-platform': '"Linux"',
+			'sec-fetch-dest': 'empty',
+			'sec-fetch-mode': 'cors',
+			'sec-fetch-site': 'same-site',
+			Referer: 'https://marketplace.thetanarena.com/',
+			'Referrer-Policy': 'strict-origin-when-cross-origin',
+		},
+		data: null,
+	});
+	if (loginNonceReq.status !== 200 && !loginNonceReq.data.success) {
+		console.log('Failed to get login nonce');
+		return false;
+	}
+	const loginNonce = String(loginNonceReq.data.data.nonce);
+	const userSignature = web3.eth.accounts.sign(loginNonce, process.env.WALLET_PRIVATE_KEY).signature;
+
+	const loginReq = await axios({
+		url: 'https://data.thetanarena.com/thetan/v1/authentication/token',
+		method: 'POST',
+		headers: {
+			accept: 'application/json',
+			'accept-language': 'en-US,en;q=0.9',
+			'cache-control': 'max-age=0',
+			'content-type': 'application/json',
+			'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
+			'sec-ch-ua-mobile': '?0',
+			'sec-ch-ua-platform': '"Linux"',
+			'sec-fetch-dest': 'empty',
+			'sec-fetch-mode': 'cors',
+			'sec-fetch-site': 'same-site',
+			Referer: 'https://marketplace.thetanarena.com/',
+			'Referrer-Policy': 'strict-origin-when-cross-origin',
+		},
+		data: `{"address":"${account.address}","signature": "${userSignature}"}`,
+	});
+	if (loginReq.status !== 200 && !loginReq.data.success) {
+		console.log('Failed to login');
+		return false;
+	}
+
+	return loginReq.data.data.accessToken;
+}
+
+async function getSellerSignature(thetanId, bearerToken) {
+	const sellerSignatureReq = await axios({
+		url: `https://data.thetanarena.com/thetan/v1/items/${thetanId}/signed-signature?id=${thetanId}`,
+		method: 'GET',
+		headers: {
+			accept: 'application/json',
+			'accept-language': 'en-US,en;q=0.9',
+			authorization: `Bearer ${bearerToken}`,
+			'cache-control': 'max-age=0',
+			'content-type': 'application/json',
+			'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
+			'sec-ch-ua-mobile': '?0',
+			'sec-ch-ua-platform': '"Linux"',
+			'sec-fetch-dest': 'empty',
+			'sec-fetch-mode': 'cors',
+			'sec-fetch-site': 'same-site',
+			Referer: 'https://marketplace.thetanarena.com/',
+			'Referrer-Policy': 'strict-origin-when-cross-origin',
+		},
+		data: null,
+	});
+	if (sellerSignatureReq.status !== 200 && !sellerSignatureReq.data.success) {
+		console.log('Failed to get seller signature');
+		return false;
+	}
+
+	return sellerSignatureReq.data.data;
+}
+
+async function buyThetan(thetanId, tokenId, thetanPrice, sellerAddress) {
 	const isBnbBalanceValid = await checkBnbBalance();
 	if (!isBnbBalanceValid) process.exit();
 	const isWbnbBalanceValid = await checkWbnbBalance(thetanPrice);
 	if (!isWbnbBalanceValid) return;
+	const sellerSignature = await getSellerSignature(thetanId, marketplaceBearerToken);
+	if (!sellerSignature) return;
 
-	const transactionFee = await thetanContract.methods.transactionFee().call();
+	// const nonce = await web3.eth.getTransactionCount(account.address);
+	const thetanContract = new web3.eth.Contract(THETAN_MARKETPLACE_ABI, THETAN_MARKETPLACE_CONTRACT_ADDRESS);
+	const saltNonce = Math.round(new Date().getTime() / 1000);
 
 	console.log(`Buying thetan ${thetanId} for ${thetanPrice}`);
-	const thetanContract = new web3.eth.Contract(THETAN_MARKETPLACE_ABI, THETAN_MARKETPLACE_CONTRACT_ADDRESS);
-	const result = await thetanContract.methods.matchTransaction(
-		thetanId,
-		THETAN_HERO_CONTRACT_ADDRESS,
-		thetanPrice,
-		WBNB_CONTRACT_ADDRESS,
-		sellerAddress,
-		process.env.WALLET_ADDRESS,
-		transactionFee
-	);
-	console.log(`Transaction: ${result}`);
+	// address[3] [seller_address,nft_address,payment_token_address]
+	// uint256[3] [token_id,price,salt_nonce]
+	// bytes seller_signature
+	const result = await thetanContract.methods
+		.matchTransaction(
+			[sellerAddress, THETAN_HERO_CONTRACT_ADDRESS, WBNB_CONTRACT_ADDRESS],
+			[tokenId, thetanPrice, saltNonce],
+			sellerSignature
+		)
+		.estimateGas({ from: account.address });
+
+	console.log(result);
 	// FIXME, buy once to test
 	process.exit();
 }
@@ -374,5 +463,10 @@ async function buyThetan(thetanId, thetanPrice, sellerAddress) {
 async function sellThetan(thetanId, thetanPrice) {
 	// TODO
 }
+
+marketplaceBearerToken = await thetanLogin();
+setAsyncInterval(async () => {
+	marketplaceBearerToken = await thetanLogin();
+}, 86400);
 
 export { buyThetan, sellThetan };

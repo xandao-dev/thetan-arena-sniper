@@ -110,7 +110,7 @@ async function thetanRoutine() {
 			console.log(
 				colors.brightGreen(
 					`${hero.name}(${hero.id.slice(0, 8)}):
-	Date Listed: ${new Date(Date.now()).toLocaleString()}
+	Current Time: ${new Date(Date.now()).toLocaleString()}
 	Price: $${hero.heroPriceDollar}
 	Earn Potential: $${hero.earnPotentialDollar}
 	Earn Rate: ${hero.earnRatePercentage}%
@@ -122,8 +122,8 @@ async function thetanRoutine() {
 
 	async function buyBestThetans(bestThetans) {
 		if (bestThetans.length > 0) {
-			const thetanPrice = (bestThetans[0].price / 1e8) * 1e18;
-			await buyThetan(bestThetans[0].tokenId, bestThetans[0].id, thetanPrice, bestThetans[0].ownerAddress);
+			const thetanPrice = BigInt((bestThetans[0].price / 1e8) * 1e18);
+			await buyThetan(bestThetans[0].id, bestThetans[0].tokenId, thetanPrice, bestThetans[0].ownerAddress);
 		}
 	}
 
