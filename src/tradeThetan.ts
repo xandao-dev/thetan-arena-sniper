@@ -450,7 +450,7 @@ async function buyThetan(thetanId: string, tokenId: string, thetanPrice: BigInt,
 
 	// const nonce = await web3.eth.getTransactionCount(account.address);
 	const thetanContract = new web3.eth.Contract(THETAN_MARKETPLACE_ABI, THETAN_MARKETPLACE_CONTRACT_ADDRESS);
-	const saltNonce = Math.round(new Date().getTime() / 1000);
+	const saltNonce = 0; // Math.round(new Date().getTime() / 1000);
 
 	console.log(`Buying thetan ${thetanId} for ${thetanPrice}`);
 	// address[3] [seller_address,nft_address,payment_token_address]
@@ -459,11 +459,10 @@ async function buyThetan(thetanId: string, tokenId: string, thetanPrice: BigInt,
 	const result = await thetanContract.methods
 		.matchTransaction(
 			[sellerAddress, THETAN_HERO_CONTRACT_ADDRESS, WBNB_CONTRACT_ADDRESS],
-			[tokenId, thetanPrice, saltNonce],
+			[web3.utils.toBN(tokenId).toString(), thetanPrice.toString(), web3.utils.toHex(saltNonce)],
 			sellerSignature
 		)
-		.estimateGas({ from: account.address });
-
+		.send({ from: account.address, gas: GAS_LIMIT, gasPrice: GAS_UNIT_PRICE_GWEI * 1e9 });
 	console.log(result);
 	// FIXME, buy once to test
 	process.exit();
