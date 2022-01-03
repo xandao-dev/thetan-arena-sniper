@@ -12,7 +12,7 @@ const WIN_RATE = 0.5;
 const EARN_EXPECT_PERCENTAGE = parseFloat(process.argv[3]) || 0.5;
 const THETAN_RARITY_WIN_REWARDS_PER_BATTLE_THC = [9.25, 12.5, 29.55];
 const FETCH_THETANS = 'https://data.thetanarena.com/thetan/v1/nif/search?sort=Latest&batPercentMin=0&from=0&size=10';
-const FETCH_THETANS_INTERVAL = 250;
+const FETCH_THETANS_INTERVAL = 1; // fast as possible, the fetch takes some ms to run and it blocks the interval
 
 /* Coin Prices Routine Constants */
 const FETCH_THC = 'https://poocoin.app/tokens/0x24802247bd157d771b7effa205237d8e9269ba8a';
@@ -35,7 +35,10 @@ async function thetanRoutine() {
 
 	async function getThetans() {
 		try {
+			const startTime = process.hrtime();
 			const response = await axios.get(FETCH_THETANS);
+			const endTime = process.hrtime(startTime);
+			console.log(`FETCH_THETANS took ${endTime[0] * 1000 + endTime[1] / 1000000}ms`);
 			if (response.data.success) {
 				return response.data.data;
 			}
