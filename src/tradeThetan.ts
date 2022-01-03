@@ -452,20 +452,23 @@ async function buyThetan(thetanId: string, tokenId: string, thetanPrice: BigInt,
 	const thetanContract = new web3.eth.Contract(THETAN_MARKETPLACE_ABI, THETAN_MARKETPLACE_CONTRACT_ADDRESS);
 	const saltNonce = 0; // Math.round(new Date().getTime() / 1000);
 
-	console.log(`Buying thetan ${thetanId} for ${thetanPrice}`);
-	// address[3] [seller_address,nft_address,payment_token_address]
-	// uint256[3] [token_id,price,salt_nonce]
-	// bytes seller_signature
-	const result = await thetanContract.methods
-		.matchTransaction(
-			[sellerAddress, THETAN_HERO_CONTRACT_ADDRESS, WBNB_CONTRACT_ADDRESS],
-			[web3.utils.toBN(tokenId).toString(), thetanPrice.toString(), web3.utils.toHex(saltNonce)],
-			sellerSignature
-		)
-		.send({ from: account.address, gas: GAS_LIMIT, gasPrice: GAS_UNIT_PRICE_GWEI * 1e9 });
-	console.log(result);
-	// FIXME, buy once to test
-	process.exit();
+	try {
+		console.log(`Buying thetan ${thetanId} for ${parseInt(thetanPrice.toString()) / 1e18} WBNB`);
+
+		// address[3] [seller_address,nft_address,payment_token_address]
+		// uint256[3] [token_id,price,salt_nonce]
+		// bytes seller_signature
+		const res = await thetanContract.methods
+			.matchTransaction(
+				[sellerAddress, THETAN_HERO_CONTRACT_ADDRESS, WBNB_CONTRACT_ADDRESS],
+				[web3.utils.toBN(tokenId).toString(), thetanPrice.toString(), web3.utils.toHex(saltNonce)],
+				sellerSignature
+			)
+			.send({ from: account.address, gas: GAS_LIMIT, gasPrice: GAS_UNIT_PRICE_GWEI * 1e9 });
+		console.log(res);
+	} catch (e) {
+		console.log(`Failed to buy thetan ${thetanId} for ${parseInt(thetanPrice.toString()) / 1e18}`);
+	}
 }
 
 async function sellThetan(thetanId: string, thetanPrice: BigInt) {

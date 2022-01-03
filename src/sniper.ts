@@ -12,7 +12,7 @@ const WIN_RATE = 0.5;
 const EARN_EXPECT_PERCENTAGE = parseFloat(process.argv[3]) || 0.5;
 const THETAN_RARITY_WIN_REWARDS_PER_BATTLE_THC = [9.25, 12.5, 29.55];
 const FETCH_THETANS = 'https://data.thetanarena.com/thetan/v1/nif/search?sort=Latest&batPercentMin=0&from=0&size=10';
-const FETCH_THETANS_INTERVAL = 500;
+const FETCH_THETANS_INTERVAL = 250;
 
 /* Coin Prices Routine Constants */
 const FETCH_THC = 'https://poocoin.app/tokens/0x24802247bd157d771b7effa205237d8e9269ba8a';
