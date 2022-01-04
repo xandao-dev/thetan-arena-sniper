@@ -382,10 +382,12 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
-beepbeep@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/beepbeep/-/beepbeep-1.3.0.tgz#c95dd9fe1bc1293dbd1f47392a78c5221032dbfe"
-  integrity sha512-11LndKDm4yoWDfAAfamuT4OZSeNyDOE7xDWrvSjK369bEdZHDECAESyrqnXB5qbgODEASJX9GUz1ZdGfIJFpUQ==
+beeper@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/beeper/-/beeper-3.0.0.tgz#d3f84c2224049cd69faee935bd74b1c331d89bdc"
+  integrity sha512-8d0BXEuBIiPfmKvATnSCN58sGKCB3vy+lwORdSvfC5uN6OMlPj9/aVMXsmvt5dIvjjyxiuKYfMVWpiAh/kJr5w==
+  dependencies:
+    yoctodelay "^1.2.0"
 
 bignumber.js@^9.0.0:
   version "9.0.2"
@@ -3310,3 +3312,8 @@ yn@3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/yn/-/yn-3.1.1.tgz#1e87401a09d767c1d5eab26a6e4c185182d2eb50"
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
+
+yoctodelay@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/yoctodelay/-/yoctodelay-1.2.0.tgz#0d020c8bcec22989369db31e5d352acc6a13eda8"
+  integrity sha512-12y/P9MSig9/5BEhBgylss+fkHiCRZCvYR81eH35NW9uw801cvJt31EAV+WOLcwZRZbLiIQl/hxcdXXXFmGvXg==

@@ -6,17 +6,17 @@
     "name": "Alexandre Calil Martins Fonseca",
     "email": "alexandrecalilmf@gmail.com"
   },
-  "description": "Find the best thetans from Thetan Arena Marketplace",
-  "main": "./dist/sniper.js",
+  "description": "Trade the best thetans from Thetan Arena Marketplace",
+  "main": "./dist/main.js",
   "scripts": {
-    "dev": "ts-node-dev ./src/sniper.ts",
-    "prod": "node dist/sniper.js",
+    "dev": "ts-node-dev ./src/main.ts",
+    "prod": "node dist/main.js",
     "build": "tsc -p . && cp -r ./node_modules/ ./dist/"
   },
   "license": "UNLICENSED",
   "dependencies": {
     "axios": "^0.24.0",
-    "beepbeep": "^1.3.0",
+    "beeper": "^3.0.0",
     "colors": "^1.4.0",
     "debounce": "^1.2.1",
     "dotenv": "^10.0.0",
