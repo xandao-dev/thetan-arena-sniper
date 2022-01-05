@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { setIntervalAsync } from 'set-interval-async/dynamic/index.js';
-import { clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async';
 import { urls } from './utils/urls.js';
 import { cts } from './utils/constants.js';
+import { Watcher } from './Watcher.js';
 
 interface ICoins {
 	BNB: number;
@@ -10,20 +9,17 @@ interface ICoins {
 }
 type Coin = keyof ICoins;
 
-class CoinWatcher {
+class CoinWatcher extends Watcher {
 	public coins: ICoins;
-	private fetchInterval: number;
-	private started: boolean = false;
-	private getCoinsIntervalTimer?: SetIntervalAsyncTimer;
 	constructor(fetchIntervalMs: number = cts.FETCH_COINS_INTERVAL) {
-		this.fetchInterval = fetchIntervalMs;
+		super(fetchIntervalMs);
 		this.coins = {
 			BNB: 0,
 			THC: 0,
 		};
 	}
 
-	public async fetchCoin(coin: Coin): Promise<number> {
+	private async fetchCoin(coin: Coin): Promise<number> {
 		try {
 			const req = await axios.get(urls[`GET_${coin}_PRICE`]);
 			if (req.status !== 200) {
@@ -43,27 +39,10 @@ class CoinWatcher {
 		}
 	}
 
-	public async start(): Promise<void> {
-		if (this.started) {
-			return;
-		}
-		this.started = true;
-
+	protected async fetchData(): Promise<void> {
 		for (const coin of ['BNB', 'THC']) {
 			this.coins[coin as Coin] = await this.fetchCoin(coin as Coin);
 		}
-		this.getCoinsIntervalTimer = setIntervalAsync(async () => {
-			for (const coin of ['BNB', 'THC']) {
-				this.coins[coin as Coin] = await this.fetchCoin(coin as Coin);
-			}
-		}, this.fetchInterval);
-	}
-
-	public async stop(): Promise<void> {
-		if (this.getCoinsIntervalTimer) {
-			await clearIntervalAsync(this.getCoinsIntervalTimer);
-		}
-		this.started = false;
 	}
 }
 

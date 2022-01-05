@@ -3,6 +3,12 @@ import { Contract } from 'web3-eth-contract';
 import { WBNB_ABI, WBNB_CONTRACT_ADDRESS } from './utils/contracts.js';
 import { cts } from './utils/constants.js';
 
+interface ICoins {
+	BNB: number;
+	WBNB: number;
+}
+type Coin = keyof ICoins;
+
 class Wallet {
 	readonly address: string;
 	readonly privateKey: string;
@@ -24,24 +30,19 @@ class Wallet {
 		this.wbnbContract = new web3.eth.Contract(WBNB_ABI, WBNB_CONTRACT_ADDRESS);
 	}
 
-	public async getBNBBalance(): Promise<number> {
+	public async getBalance(coin: Coin): Promise<number> {
 		try {
-			const balance = parseFloat(this.web3.utils.fromWei(await this.web3.eth.getBalance(this.address)));
-			return balance;
+			if (coin === 'BNB') {
+				return parseFloat(this.web3.utils.fromWei(await this.web3.eth.getBalance(this.address)));
+			}
+			if (coin === 'WBNB') {
+				return parseFloat(
+					this.web3.utils.fromWei(await this.wbnbContract.methods.balanceOf(this.address).call())
+				);
+			}
+			throw new Error(`Unknown coin: ${coin}`);
 		} catch (e: any) {
-			console.error(`Error getting BNB balance: ${e.message}`);
-			return 0;
-		}
-	}
-
-	public async getWBNBBalance(): Promise<number> {
-		try {
-			const balance = parseFloat(
-				this.web3.utils.fromWei(await this.wbnbContract.methods.balanceOf(this.address).call())
-			);
-			return balance;
-		} catch (e: any) {
-			console.error(`Error getting WBNB balance: ${e.message}`);
+			console.error(`Failed to get ${coin} balance: ${e.message}`);
 			return 0;
 		}
 	}

@@ -131,7 +131,7 @@ class Marketplace {
 
 	// FIXME: set a minimum bnb balance like 10$ or something
 	private async checkBNBBalance(): Promise<boolean> {
-		const bnbBalance = await this.wallet.getBNBBalance();
+		const bnbBalance = await this.wallet.getBalance('BNB');
 		if (bnbBalance < GAS_LIMIT * GAS_UNIT_PRICE_GWEI * 1e-9) {
 			console.log(`BNB balance is too low to pay the fees. Balance: ${bnbBalance}`);
 			return false;
@@ -140,7 +140,7 @@ class Marketplace {
 	}
 
 	private async checkWBNBBalance(thetanPrice: number): Promise<boolean> {
-		const wbnbBalance = await this.wallet.getWBNBBalance();
+		const wbnbBalance = await this.wallet.getBalance('WBNB');
 		if (wbnbBalance < thetanPrice) {
 			console.log(`WBNB balance is too low. Balance: ${wbnbBalance}`);
 			return false;
