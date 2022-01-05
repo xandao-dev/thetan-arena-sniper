@@ -1,6 +1,7 @@
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 import { WBNB_ABI, WBNB_CONTRACT_ADDRESS } from './utils/contracts.js';
+import { cts } from './utils/constants.js';
 
 class Wallet {
 	readonly address: string;
@@ -24,47 +25,57 @@ class Wallet {
 	}
 
 	public async getBNBBalance(): Promise<number> {
-		const balance = parseFloat(this.web3.utils.fromWei(await this.web3.eth.getBalance(this.address)));
-		return balance;
+		try {
+			const balance = parseFloat(this.web3.utils.fromWei(await this.web3.eth.getBalance(this.address)));
+			return balance;
+		} catch (e: any) {
+			console.error(`Error getting BNB balance: ${e.message}`);
+			return 0;
+		}
 	}
 
 	public async getWBNBBalance(): Promise<number> {
-		const balance = parseFloat(
-			this.web3.utils.fromWei(await this.wbnbContract.methods.balanceOf(this.address).call())
-		);
-		return balance;
+		try {
+			const balance = parseFloat(
+				this.web3.utils.fromWei(await this.wbnbContract.methods.balanceOf(this.address).call())
+			);
+			return balance;
+		} catch (e: any) {
+			console.error(`Error getting WBNB balance: ${e.message}`);
+			return 0;
+		}
 	}
 
-	// FIXME: test this
 	public async unwrapBNB(amount: number): Promise<void> {
 		try {
 			const amountWei = this.web3.utils.toWei(amount.toString());
-			/*const tx = await this.wbnbContract.methods.withdraw(amountWei).send({
+
+			// The estimated gas cost is not accurate, so we use a higher gas limit
+			// const gas = await this.wbnbContract.methods.withdraw(amountWei).estimateGas({ from: this.address });
+
+			const tx = await this.wbnbContract.methods.withdraw(amountWei).send({
 				from: this.address,
-				gas: GAS_LIMIT,
-				gasPrice: GAS_UNIT_PRICE_GWEI,
-			});*/
-			// console.log(`Successfully unwrapped ${amount} BNB. Transaction hash: ${tx.transactionHash}`);
+				gas: cts.unwrapBNBGas,
+				gasPrice: cts.unwrapBNBGasPrice * 1e9,
+			});
+			console.log(`Successfully unwrapped ${amount} BNB. Transaction hash: ${tx.transactionHash}`);
 		} catch (e: any) {
 			console.error(`Failed to unwrap BNB: ${e.message}`);
 		}
 	}
 
-	// FIXME: test this
 	public async wrapBNB(amount: number): Promise<void> {
 		try {
-			const amountBNB = this.web3.utils.toDecimal(amount.toString());
-			// estimate gas
-			const gas = await this.wbnbContract.methods.deposit(amountBNB).estimateGas({
+			// The estimated gas cost is not accurate, so we use a higher gas limit
+			// const gas = await this.wbnbContract.methods.deposit().estimateGas({ from: this.address });
+
+			const tx = await this.wbnbContract.methods.deposit().send({
+				value: this.web3.utils.toWei(amount.toString()),
 				from: this.address,
+				gas: cts.wrapBNBGas,
+				gasPrice: cts.wrapBNBGasPrice * 1e9,
 			});
-			console.log(`Estimated gas for deposit: ${gas}`);
-			/*const tx = await this.wbnbContract.methods.wrapBNB(amountBNB).send({
-				from: this.address,
-				gas: GAS_LIMIT,
-				gasPrice: GAS_UNIT_PRICE_GWEI,
-			});*/
-			// console.log(`Successfully wrapped ${amount} BNB. Transaction hash: ${tx.transactionHash}`);
+			console.log(`Successfully wrapped ${amount} BNB. Transaction hash: ${tx.transactionHash}`);
 		} catch (e: any) {
 			console.log(`Error wrapping BNB: ${e.message}`);
 		}

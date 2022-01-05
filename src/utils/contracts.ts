@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 const THETAN_HERO_CONTRACT_ADDRESS: string = '0x98eb46cbf76b19824105dfbcfa80ea8ed020c6f4';
 const THETAN_HERO_ABI: any[] = [
 	{ inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
@@ -543,7 +546,10 @@ const MARKETPLACE_ABI: any[] = [
 	},
 ];
 
-const WBNB_CONTRACT_ADDRESS: string = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+let WBNB_CONTRACT_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+if (process.env.IS_TESTNET === 'true') {
+	WBNB_CONTRACT_ADDRESS = '0xae13d989dac2f0debff460ac112a837c89baa7cd';
+}
 const WBNB_ABI: any[] = [
 	{
 		constant: true,

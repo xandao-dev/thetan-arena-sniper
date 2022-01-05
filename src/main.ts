@@ -8,17 +8,14 @@ import colors from 'colors';
 import dotenv from 'dotenv';
 dotenv.config();
 
-/* Thetan Routine Constants */
-const myFundsDollar = parseFloat(process.argv[2]) || 120;
-
-const EARN_EXPECT_PERCENTAGE = parseFloat(process.argv[3]) || 0.5;
-
-const web3 = new Web3('https://bsc-dataseed1.binance.org:443');
 async function main() {
-	console.log('My funds: ' + MY_FUNDS_DOLLAR);
-	console.log('Earn expect percentage: ' + EARN_EXPECT_PERCENTAGE);
+	const earnExpectPercentage = parseFloat(process.argv[3]) || 0.5;
+	console.log('Earn expect percentage: ' + earnExpectPercentage);
 
-	thetanRoutine();
+	const web3 = new Web3(process.env.BSC_PROVIDER || 'https://data-seed-prebsc-1-s1.binance.org:8545');
+	const wallet = new Wallet(web3);
+	console.log(`${await wallet.getBNBBalance()} BNB`);
+	console.log(`${await wallet.getWBNBBalance()} WBNB`);
 }
 
 try {
