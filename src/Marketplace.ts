@@ -1,9 +1,11 @@
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 import axios from 'axios';
-import { setAsyncInterval } from './utils/asyncInterval.js';
+import { setIntervalAsync } from 'set-interval-async/dynamic/index.js';
+import { clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async';
 import { Wallet } from './Wallet.js';
 import { urls } from './utils/urls.js';
+import { cts } from './utils/constants.js';
 import {
 	MARKETPLACE_ABI,
 	MARKETPLACE_CONTRACT_ADDRESS,
@@ -18,6 +20,7 @@ class Marketplace {
 	private wallet: Wallet;
 	private web3: Web3;
 	private bearer?: string;
+	private connectIntervalTimer?: SetIntervalAsyncTimer;
 	private thetanContract: Contract;
 
 	constructor(web3: Web3, wallet: Wallet) {
@@ -33,10 +36,13 @@ class Marketplace {
 	}
 
 	public async connect(): Promise<void> {
+		if (this.connectIntervalTimer) {
+			clearIntervalAsync(this.connectIntervalTimer);
+		}
 		this.bearer = await this.login();
-		setAsyncInterval(async () => {
+		this.connectIntervalTimer = setIntervalAsync(async () => {
 			this.bearer = await this.login();
-		}, 86400);
+		}, cts.MARKETPLACE_LOGIN_INTERVAL);
 	}
 
 	private async login(): Promise<string> {
@@ -145,7 +151,7 @@ class Marketplace {
 	public async buyThetan(
 		thetanId: string,
 		tokenId: string,
-		thetanPrice: BigInt,
+		thetanPrice: number,
 		sellerAddress: string
 	): Promise<void> {
 		const isBnbBalanceValid = await this.checkBNBBalance();

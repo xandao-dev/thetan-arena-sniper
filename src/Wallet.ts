@@ -55,8 +55,8 @@ class Wallet {
 
 			const tx = await this.wbnbContract.methods.withdraw(amountWei).send({
 				from: this.address,
-				gas: cts.unwrapBNBGas,
-				gasPrice: cts.unwrapBNBGasPrice * 1e9,
+				gas: cts.UNWRAP_BNB_GAS,
+				gasPrice: cts.UNWRAP_BNB_GAS_PRICE * 1e9,
 			});
 			console.log(`Successfully unwrapped ${amount} BNB. Transaction hash: ${tx.transactionHash}`);
 		} catch (e: any) {
@@ -72,8 +72,8 @@ class Wallet {
 			const tx = await this.wbnbContract.methods.deposit().send({
 				value: this.web3.utils.toWei(amount.toString()),
 				from: this.address,
-				gas: cts.wrapBNBGas,
-				gasPrice: cts.wrapBNBGasPrice * 1e9,
+				gas: cts.WRAP_BNB_GAS,
+				gasPrice: cts.WRAP_BNB_GAS_PRICE * 1e9,
 			});
 			console.log(`Successfully wrapped ${amount} BNB. Transaction hash: ${tx.transactionHash}`);
 		} catch (e: any) {

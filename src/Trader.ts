@@ -1,3 +1,4 @@
+/*
 import beeper from 'beeper';
 await beeper('*-*-*');
 
@@ -108,3 +109,4 @@ async function thetanRoutine() {
 		}
 	}, FETCH_THETANS_INTERVAL);
 }
+*/
