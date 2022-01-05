@@ -14,16 +14,12 @@ async function main() {
 	const wallet = new Wallet(web3);
 
 	const walletWatcher = new WalletWatcher(wallet);
-
-	console.log('Wallet balance: ' + walletWatcher.balance['BNB']);
-	setInterval(() => {
-		console.log('Wallet balance: ' + walletWatcher.balance['BNB']);
-	}, 5000);
-
 	await walletWatcher.start();
 
 	const coinWatcher = new CoinWatcher();
 	await coinWatcher.start();
+
+	const marketplace = new Marketplace(web3, wallet);
 }
 
 try {

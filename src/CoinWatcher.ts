@@ -21,7 +21,25 @@ class CoinWatcher extends Watcher {
 
 	private async fetchCoin(coin: Coin): Promise<number> {
 		try {
-			const req = await axios.get(urls[`GET_${coin}_PRICE`]);
+			const req = await axios({
+				url: urls[`GET_${coin}_PRICE`],
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					'accept-language': 'en-US,en;q=0.9',
+					'cache-control': 'max-age=0',
+					'content-type': 'application/json',
+					'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
+					'sec-ch-ua-mobile': '?0',
+					'sec-ch-ua-platform': '"Linux"',
+					'sec-fetch-dest': 'empty',
+					'sec-fetch-mode': 'cors',
+					'sec-fetch-site': 'same-site',
+					Referer: 'https://marketplace.thetanarena.com/',
+					'Referrer-Policy': 'strict-origin-when-cross-origin',
+				},
+				data: null,
+			});
 			if (req.status !== 200) {
 				throw new Error(`Network error: ${req.status}`);
 			}

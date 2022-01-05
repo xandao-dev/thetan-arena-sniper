@@ -11,6 +11,10 @@ abstract class Watcher {
 
 	protected abstract fetchData(): Promise<void>;
 
+	public async update(): Promise<void> {
+		await this.fetchData();
+	}
+
 	public async start(): Promise<void> {
 		if (this.started) {
 			return;

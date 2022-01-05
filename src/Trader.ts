@@ -1,4 +1,3 @@
-/*
 import beeper from 'beeper';
 await beeper('*-*-*');
 
@@ -91,8 +90,12 @@ async function thetanRoutine() {
 
 	async function buyBestThetans(bestThetans: any[]) {
 		if (bestThetans.length > 0) {
-			const thetanPrice = BigInt((bestThetans[0].price / 1e8) * 1e18);
-			await buyThetan(bestThetans[0].id, bestThetans[0].tokenId, thetanPrice, bestThetans[0].ownerAddress);
+			await buyThetan(
+				bestThetans[0].id,
+				bestThetans[0].tokenId,
+				bestThetans[0].price,
+				bestThetans[0].ownerAddress
+			);
 		}
 	}
 
@@ -109,4 +112,3 @@ async function thetanRoutine() {
 		}
 	}, FETCH_THETANS_INTERVAL);
 }
-*/
