@@ -42,8 +42,7 @@ class Wallet {
 			}
 			throw new Error(`Unknown coin: ${coin}`);
 		} catch (e: any) {
-			console.error(`Failed to get ${coin} balance: ${e.message}`);
-			return 0;
+			throw new Error(`Failed to get ${coin} balance: ${e.message}`);
 		}
 	}
 

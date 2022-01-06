@@ -112,23 +112,15 @@ async function tradeRoutine(
 
 	async function verifyBalances(bestThetans: any[]) {
 		if (walletWatcher.balance.WBNB < bestThetans[0].price / 1e8) {
-			// Double check
-			const WBNBBalance = await wallet.getBalance('WBNB');
-			if (WBNBBalance < bestThetans[0].price / 1e8) {
-				console.log(colors.red('Not enough WBNB balance!'));
-				beeper(1);
-			}
+			console.log(colors.red('Not enough WBNB balance!'));
+			beeper(1);
 			return false;
 		}
 		if (walletWatcher.balance.BNB < cts.MARKETPLACE_MAX_GAS_PRICE * cts.MARKETPLACE_BUY_GAS * 1e-9) {
-			// Double check
-			const BNBBalance = await wallet.getBalance('BNB');
-			if (BNBBalance < cts.MARKETPLACE_MAX_GAS_PRICE * cts.MARKETPLACE_BUY_GAS * 1e-9) {
-				const buyAmount = cts.MARKETPLACE_MAX_GAS_PRICE * cts.MARKETPLACE_BUY_GAS * 1e-9 * 2;
-				console.log(colors.red(`Not enough BNB balance, buying ${buyAmount} BNB!`));
-				await wallet.unwrapBNB(buyAmount);
-				beeper(1);
-			}
+			const buyAmount = cts.MARKETPLACE_MAX_GAS_PRICE * cts.MARKETPLACE_BUY_GAS * 1e-9 * 2;
+			console.log(colors.red(`Not enough BNB balance, buying ${buyAmount} BNB!`));
+			await wallet.unwrapBNB(buyAmount);
+			beeper(1);
 			return false;
 		}
 		return true;
