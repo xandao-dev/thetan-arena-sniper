@@ -12,7 +12,7 @@ dotenv.config();
 async function main() {
 	console.log('Starting...');
 
-	const earnExpectPercentage = parseFloat(process.argv[3]) || 0.5;
+	const earnExpectPercentage = parseFloat(process.argv[2]) || 0.5;
 	console.log('Earn expect percentage: ' + earnExpectPercentage);
 
 	const web3 = new Web3(process.env.BSC_PROVIDER || 'https://data-seed-prebsc-1-s1.binance.org:8545');
