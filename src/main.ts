@@ -146,9 +146,10 @@ async function tradeRoutine(
 		let bestThetans = await getBestThetans(thetans);
 		bestThetans = filterAlreadyListedThetans(bestThetans);
 		bestThetans = orderThetansByEarnRate(bestThetans);
-		const isBalanceValid = await verifyBalances(bestThetans);
+		if (bestThetans && bestThetans.length > 0) {
+			const isBalanceValid = await verifyBalances(bestThetans);
+			if (!isBalanceValid) return;
 
-		if (bestThetans && bestThetans.length > 0 && isBalanceValid) {
 			await marketplace.buyThetan(
 				bestThetans[0].id,
 				bestThetans[0].tokenId,
