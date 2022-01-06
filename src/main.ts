@@ -25,6 +25,7 @@ async function main() {
 	await coinWatcher.start();
 
 	const marketplace = new Marketplace(web3, wallet);
+	await marketplace.connect();
 
 	tradeRoutine(wallet, walletWatcher, coinWatcher, marketplace, earnExpectPercentage);
 }
@@ -164,10 +165,8 @@ async function tradeRoutine(
 	}
 }
 
-try {
-	main();
-} catch (e: any) {
+main().catch((e: any) => {
 	console.log(`Error: ${e}`);
 	console.log('Restarting...');
 	main();
-}
+});
