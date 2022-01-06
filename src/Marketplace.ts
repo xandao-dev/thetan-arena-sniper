@@ -177,7 +177,7 @@ class Marketplace {
 	private async getSaltNonce(thetanId: string): Promise<number> {
 		try {
 			const req = await axios({
-				url: `'https://data.thetanarena.com/thetan/v1/items/${thetanId}?id=${thetanId}`,
+				url: `https://data.thetanarena.com/thetan/v1/items/${thetanId}?id=${thetanId}`,
 				method: 'GET',
 				headers: {
 					accept: 'application/json',
