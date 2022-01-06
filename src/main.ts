@@ -1,9 +1,7 @@
 import beeper from 'beeper';
 import colors from 'colors';
-import { setIntervalAsync } from 'set-interval-async/dynamic/index.js';
-import { clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async';
 import Web3 from 'web3';
-import { cts } from './utils/constants';
+import { cts } from './utils/constants.js';
 import { Marketplace } from './Marketplace.js';
 import { Wallet } from './Wallet.js';
 import { WalletWatcher } from './WalletWatcher.js';
