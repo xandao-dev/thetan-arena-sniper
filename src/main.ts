@@ -26,24 +26,30 @@ function setupLogger() {
 }
 
 async function main() {
-	console.log('Starting...');
+	try {
+		console.log('Starting...');
 
-	const earnExpectPercentage = parseFloat(process.argv[2]) || 0.5;
-	console.log('Earn expect percentage: ' + earnExpectPercentage);
+		const earnExpectPercentage = parseFloat(process.argv[2]) || 0.5;
+		console.log('Earn expect percentage: ' + earnExpectPercentage);
 
-	const web3 = new Web3(process.env.BSC_PROVIDER || 'https://data-seed-prebsc-1-s1.binance.org:8545');
-	const wallet = new Wallet(web3);
+		const web3 = new Web3(process.env.BSC_PROVIDER || 'https://data-seed-prebsc-1-s1.binance.org:8545');
+		const wallet = new Wallet(web3);
 
-	const walletWatcher = new WalletWatcher(wallet);
-	await walletWatcher.start();
+		const walletWatcher = new WalletWatcher(wallet);
+		await walletWatcher.start();
 
-	const coinWatcher = new CoinWatcher();
-	await coinWatcher.start();
+		const coinWatcher = new CoinWatcher();
+		await coinWatcher.start();
 
-	const marketplace = new Marketplace(web3, wallet);
-	await marketplace.connect();
+		const marketplace = new Marketplace(web3, wallet);
+		await marketplace.connect();
 
-	await tradeRoutine(wallet, walletWatcher, coinWatcher, marketplace, earnExpectPercentage);
+		await tradeRoutine(wallet, walletWatcher, coinWatcher, marketplace, earnExpectPercentage);
+	} catch (e: any) {
+		console.log(`Error: ${e}`);
+		console.log('Restarting...');
+		await main();
+	}
 }
 
 async function tradeRoutine(
@@ -189,8 +195,4 @@ async function tradeRoutine(
 }
 
 const logger = setupLogger();
-main().catch((e: any) => {
-	console.log(`Error: ${e}`);
-	console.log('Restarting...');
-	main();
-});
+main();
