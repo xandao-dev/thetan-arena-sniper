@@ -23,6 +23,7 @@
     "web3": "^1.6.1"
   },
   "devDependencies": {
+    "@types/colors": "^1.2.1",
     "@types/node": "^17.0.6",
     "@types/set-interval-async": "^1.0.0",
     "ts-node-dev": "^1.1.8",

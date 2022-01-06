@@ -61,7 +61,7 @@ class Wallet {
 			});
 			console.log(`Successfully unwrapped ${amount} BNB. Transaction hash: ${tx.transactionHash}`);
 		} catch (e: any) {
-			console.error(`Failed to unwrap BNB: ${e.message}`);
+			throw new Error(`Failed to unwrap BNB: ${e.message}`);
 		}
 	}
 
@@ -78,7 +78,7 @@ class Wallet {
 			});
 			console.log(`Successfully wrapped ${amount} BNB. Transaction hash: ${tx.transactionHash}`);
 		} catch (e: any) {
-			console.log(`Error wrapping BNB: ${e.message}`);
+			throw new Error(`Error wrapping BNB: ${e.message}`);
 		}
 	}
 }

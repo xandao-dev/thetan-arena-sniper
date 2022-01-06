@@ -13,6 +13,3 @@ Marketplace:
 	1. Não é mais responsável por verificar o saldo.
 	2. *Falta estimar o gas corretamente
 	3. *Falta o método de vender o NFT
-
-Trader:
-	1. *Deve atualizar o saldo após cada operação.
