@@ -17,13 +17,12 @@
   "dependencies": {
     "axios": "^0.24.0",
     "beeper": "^3.0.0",
-    "colors": "^1.4.0",
     "dotenv": "^10.0.0",
     "set-interval-async": "^2.0.3",
+    "simple-node-logger": "^21.8.12",
     "web3": "^1.6.1"
   },
   "devDependencies": {
-    "@types/colors": "^1.2.1",
     "@types/node": "^17.0.6",
     "@types/set-interval-async": "^1.0.0",
     "ts-node-dev": "^1.1.8",

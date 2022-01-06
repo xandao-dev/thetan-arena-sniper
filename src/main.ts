@@ -1,13 +1,29 @@
 import beeper from 'beeper';
-import colors from 'colors';
 import Web3 from 'web3';
+import log from 'simple-node-logger';
 import { cts } from './utils/constants.js';
 import { Marketplace } from './Marketplace.js';
 import { Wallet } from './Wallet.js';
 import { WalletWatcher } from './WalletWatcher.js';
 import { CoinWatcher } from './CoinWatcher.js';
+import fs from 'fs';
 import dotenv from 'dotenv';
 dotenv.config();
+
+function setupLogger() {
+	const logDirectory = './logs';
+	if (!fs.existsSync(logDirectory)) {
+		fs.mkdirSync(logDirectory);
+	}
+
+	const logger = log.createRollingFileLogger({
+		errorEventName: 'error',
+		logDirectory,
+		fileNamePattern: 'thetans-<DATE>.log',
+		timestampFormat: 'YYYY-MM-DD HH:mm:ss.SSS',
+	});
+	return logger;
+}
 
 async function main() {
 	console.log('Starting...');
@@ -112,13 +128,14 @@ async function tradeRoutine(
 
 	async function verifyBalances(bestThetans: any[]) {
 		if (walletWatcher.balance.WBNB < bestThetans[0].price / 1e8) {
-			console.log(colors.red('Not enough WBNB balance!'));
+			console.log('Not enough WBNB balance! Updating balance...');
+			walletWatcher.update();
 			beeper(1);
 			return false;
 		}
 		if (walletWatcher.balance.BNB < cts.MARKETPLACE_MAX_GAS_PRICE * cts.MARKETPLACE_BUY_GAS * 1e-9) {
 			const buyAmount = cts.MARKETPLACE_MAX_GAS_PRICE * cts.MARKETPLACE_BUY_GAS * 1e-9 * 2;
-			console.log(colors.red(`Not enough BNB balance, buying ${buyAmount} BNB!`));
+			logger.warn(`Not enough BNB balance, buying ${buyAmount} BNB!`);
 			await wallet.unwrapBNB(buyAmount);
 			beeper(1);
 			return false;
@@ -128,16 +145,13 @@ async function tradeRoutine(
 
 	function logBestThetans(bestThetans: any[]) {
 		bestThetans.forEach((hero) => {
-			console.log(
-				// @ts-ignore
-				colors.brightGreen(
-					`${hero.name}(${hero.id.slice(0, 8)}):
+			logger.info(
+				`${hero.name}(${hero.id.slice(0, 8)}):
 	Current Time: ${new Date(Date.now()).toLocaleString()}
 	Price: $${hero.heroPriceDollar}
 	Earn Potential: $${hero.earnPotentialDollar}
 	Earn Rate: ${hero.earnRatePercentage}%
 	Link: https://marketplace.thetanarena.com/item/${hero.refId}`
-				)
 			);
 		});
 	}
@@ -151,20 +165,30 @@ async function tradeRoutine(
 			const isBalanceValid = await verifyBalances(bestThetans);
 			if (!isBalanceValid) continue;
 
-			await marketplace.buyThetan(
+			const result = await marketplace.buyThetan(
 				bestThetans[0].id,
 				bestThetans[0].tokenId,
 				bestThetans[0].price,
 				bestThetans[0].ownerAddress
 			);
-			await beeper('*-*-*');
-			logBestThetans(bestThetans);
-			walletWatcher.update();
+			if (result.status === 'error') {
+				logger.error(
+					`Error buying thetan ${result.thetanId} for ${result.thetanPrice} WBNB: ${result.message}`
+				);
+				await beeper(1);
+			} else {
+				await beeper('*-*-*');
+				logBestThetans([bestThetans[0]]);
+				logger.info(`Bought thetan: ${result}`);
+				await walletWatcher.update();
+			}
+
 			lastGoodThetansIds.push(...bestThetans.map((hero) => hero.id));
 		}
 	}
 }
 
+const logger = setupLogger();
 main().catch((e: any) => {
 	console.log(`Error: ${e}`);
 	console.log('Restarting...');

@@ -224,12 +224,12 @@ class Marketplace {
 		tokenId: string,
 		thetanPrice: number,
 		sellerAddress: string
-	): Promise<void> {
+	): Promise<any> {
 		const sellerSignature = await this.getSellerSignature(thetanId);
 		const saltNonce = await this.getSaltNonce(thetanId);
 		const { gas, gasPrice } = await this.estimateGas();
 		try {
-			const price = BigInt(thetanPrice * 1e10); // price*1e8/1e18;
+			const price = BigInt(thetanPrice * 1e10); // price*1e18/1e8;
 			console.log(`Buying thetan ${thetanId} for ${parseInt(thetanPrice.toString()) / 1e18} WBNB`);
 			const tx = await this.thetanContract.methods
 				.matchTransaction(
@@ -238,13 +238,16 @@ class Marketplace {
 					sellerSignature
 				)
 				.send({ from: this.wallet.address, gas, gasPrice });
-			const receipt = await tx.wait();
-			console.log(receipt);
-			if (receipt.status === 1) {
-				console.log(`Successfully bought thetan ${thetanId}`);
-			}
+			console.log(`MAYBE we successfully bought thetan ${thetanId}`);
+			return tx;
 		} catch (e: any) {
-			console.log(`Failed to buy thetan ${thetanId} for ${parseInt(thetanPrice.toString()) / 1e18}`);
+			console.log(`Failed to buy thetan ${thetanId} for ${parseInt(thetanPrice.toString()) / 1e8}`);
+			return {
+				status: 'error',
+				message: e.message,
+				thetanId,
+				thetanPrice: parseInt(thetanPrice.toString()) / 1e8,
+			};
 		}
 	}
 
