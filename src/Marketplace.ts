@@ -215,7 +215,7 @@ class Marketplace {
 	private async estimateGas(): Promise<IGas> {
 		return {
 			gas: 300000,
-			gasPrice: 15 * 1e9,
+			gasPrice: 20 * 1e9,
 		};
 	}
 

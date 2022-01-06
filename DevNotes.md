@@ -18,7 +18,6 @@ Marketplace:
 BUG: Mesmo comprando ta mostrando que falhou
 
 IMP: Saldo mínimo para rodar
-IMP: Sistema de logs para saber quanto paguei em cada boneco e em quanto posso vendê-lo
 IMP: Deixar constantes mais fáceis de trocar
 
 OBS: Não ignorar a taxa de 4.15% de vender no mercado e nem o valor do gás

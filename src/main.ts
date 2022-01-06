@@ -43,7 +43,7 @@ async function main() {
 	const marketplace = new Marketplace(web3, wallet);
 	await marketplace.connect();
 
-	tradeRoutine(wallet, walletWatcher, coinWatcher, marketplace, earnExpectPercentage);
+	await tradeRoutine(wallet, walletWatcher, coinWatcher, marketplace, earnExpectPercentage);
 }
 
 async function tradeRoutine(
