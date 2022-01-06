@@ -182,6 +182,7 @@ class Marketplace {
 				headers: {
 					accept: 'application/json',
 					'accept-language': 'en-US,en;q=0.9',
+					authorization: `Bearer ${this.bearer}`,
 					'cache-control': 'max-age=0',
 					'content-type': 'application/json',
 					'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
@@ -194,6 +195,7 @@ class Marketplace {
 					'Referrer-Policy': 'strict-origin-when-cross-origin',
 				},
 				data: null,
+				withCredentials: true,
 			});
 			if (req.status !== 200) {
 				throw new Error(`Network error: ${req.status}`);
@@ -201,12 +203,12 @@ class Marketplace {
 			if (!req.data.success) {
 				throw new Error(`API error: ${req.data.code} - ${req.data.status}`);
 			}
-			if (!req.data?.saltNonce) {
+			if (!req.data?.data?.saltNonce) {
 				throw new Error(`API error: no saltNonce returned`);
 			}
-			return req.data.saltNonce;
+			return req.data.data.saltNonce;
 		} catch (e: any) {
-			throw new Error(`Error getting seller signature: ${e.message}`);
+			throw new Error(`Error getting saltNonce: ${e.message}`);
 		}
 	}
 
