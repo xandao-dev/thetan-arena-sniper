@@ -10,5 +10,23 @@ Install VLC:
 Run
 
 Arguments:
-	1: My Funds in USD (example: 100)
-	2: Earn expect percentage (example: 0.5)
+	1: Earn expect percentage (example: 0.3)
+
+
+Run without stop:
+	1. Install pm2:
+		```bash
+		sudo npm install pm2 -g
+		```
+	2. Run:
+		```bash
+		pm2 start ./dist/main.js -- 0.3
+		```
+	3. Monitor:
+		```bash
+		pm2 monit
+		```
+	4. Stop:
+		```bash
+		pm2 stop all
+		```

@@ -213,7 +213,7 @@ class Marketplace {
 			if (!req.data.success) {
 				throw new Error(`API error: ${req.data.code} - ${req.data.status}`);
 			}
-			if (!req.data?.data?.saltNonce) {
+			if (req.data?.data?.saltNonce === undefined) {
 				throw new Error(`API error: no saltNonce returned`);
 			}
 			return req.data.data.saltNonce;
