@@ -186,16 +186,20 @@ FAILED to buy ${thetan.name}(${thetan.id}):
 	}
 
 	while (true) {
-		const thetans = await marketplace.getThetans();
-		let bestThetans = await getBestThetans(thetans);
-		bestThetans = filterAlreadyListedThetans(bestThetans);
-		bestThetans = orderThetansByEarnRate(bestThetans);
+		try {
+			const thetans = await marketplace.getThetans();
+			let bestThetans = await getBestThetans(thetans);
+			bestThetans = filterAlreadyListedThetans(bestThetans);
+			bestThetans = orderThetansByEarnRate(bestThetans);
 
-		if (bestThetans && bestThetans.length > 0) {
-			const isBalanceValid = await verifyBalances(bestThetans);
-			if (!isBalanceValid) continue;
-			await buyThetan(bestThetans[0]);
-			lastGoodThetansIds.push(...bestThetans.map((hero) => hero.id));
+			if (bestThetans && bestThetans.length > 0) {
+				const isBalanceValid = await verifyBalances(bestThetans);
+				if (!isBalanceValid) continue;
+				await buyThetan(bestThetans[0]);
+				lastGoodThetansIds.push(...bestThetans.map((hero) => hero.id));
+			}
+		} catch (e: any) {
+			logger.error(`Error with trade routine: ${e.message}`);
 		}
 	}
 }
