@@ -48,11 +48,15 @@ class Marketplace {
 		if (this.connected) {
 			return;
 		}
-		this.connected = true;
-		this.bearer = await this.login();
-		this.connectIntervalTimer = setIntervalAsync(async () => {
+		try {
 			this.bearer = await this.login();
-		}, cts.MARKETPLACE_LOGIN_INTERVAL);
+			this.connectIntervalTimer = setIntervalAsync(async () => {
+				this.bearer = await this.login();
+			}, cts.MARKETPLACE_LOGIN_INTERVAL);
+			this.connected = true;
+		} catch (e: any) {
+			throw new Error(`Error connecting to marketplace: ${e.message}`);
+		}
 	}
 
 	public async disconnect(): Promise<void> {
@@ -219,35 +223,39 @@ class Marketplace {
 	}
 
 	private async estimateGas(thetanPrice: number, earnPotentialDollar: number): Promise<IGas> {
-		const gasPriceGweiToDollar = (gwei: number) =>
-			(cts.MARKETPLACE_BUY_GAS * gwei * this.coinWatcher.coins.BNB) / 1e9;
+		try {
+			const gasPriceGweiToDollar = (gwei: number) =>
+				(cts.MARKETPLACE_BUY_GAS * gwei * this.coinWatcher.coins.BNB) / 1e9;
 
-		const dollarToGasPriceGwei = (dollar: number) =>
-			Math.round((dollar * 1e9) / (cts.MARKETPLACE_BUY_GAS * this.coinWatcher.coins.BNB));
+			const dollarToGasPriceGwei = (dollar: number) =>
+				Math.round((dollar * 1e9) / (cts.MARKETPLACE_BUY_GAS * this.coinWatcher.coins.BNB));
 
-		// We sell based on earnPotentialDollar (controlled by win rate)
-		// The profit is affected by the marketplace fee
-		const thetanPriceDollar = (thetanPrice / 1e8) * this.coinWatcher.coins.BNB;
-		const thetanSellProfit = thetanPriceDollar - earnPotentialDollar / (1 - cts.MARKETPLACE_SELL_FEE);
+			// We sell based on earnPotentialDollar (controlled by win rate)
+			// The profit is affected by the marketplace fee
+			const thetanPriceDollar = (thetanPrice / 1e8) * this.coinWatcher.coins.BNB;
+			const thetanSellProfit = thetanPriceDollar - earnPotentialDollar / (1 - cts.MARKETPLACE_SELL_FEE);
 
-		const minimumGasDollar = gasPriceGweiToDollar(cts.MARKETPLACE_MIN_GAS_PRICE);
-		if (thetanSellProfit <= minimumGasDollar) {
-			throw new Error(`Thetan sell profit is negative (${thetanSellProfit})`);
+			const minimumGasDollar = gasPriceGweiToDollar(cts.MARKETPLACE_MIN_GAS_PRICE);
+			if (thetanSellProfit <= minimumGasDollar) {
+				throw new Error(`Thetan sell profit is negative (${thetanSellProfit})`);
+			}
+
+			// We set gas price based on a percentage of the thetanSellProfit
+			let gasPriceGwei = dollarToGasPriceGwei(thetanSellProfit * cts.MARKETPLACE_PROFIT_TO_GAS_RATIO);
+			if (gasPriceGwei >= cts.MARKETPLACE_MAX_GAS_PRICE) {
+				gasPriceGwei = cts.MARKETPLACE_MAX_GAS_PRICE;
+			}
+			if (gasPriceGwei <= cts.MARKETPLACE_MIN_GAS_PRICE) {
+				gasPriceGwei = cts.MARKETPLACE_MIN_GAS_PRICE;
+			}
+
+			return {
+				gas: cts.MARKETPLACE_BUY_GAS,
+				gasPrice: gasPriceGwei * 1e9,
+			};
+		} catch (e: any) {
+			throw new Error(`Error estimating gas: ${e.message}`);
 		}
-
-		// We set gas price based on a percentage of the thetanSellProfit
-		let gasPriceGwei = dollarToGasPriceGwei(thetanSellProfit * cts.MARKETPLACE_PROFIT_TO_GAS_RATIO);
-		if (gasPriceGwei >= cts.MARKETPLACE_MAX_GAS_PRICE) {
-			gasPriceGwei = cts.MARKETPLACE_MAX_GAS_PRICE;
-		}
-		if (gasPriceGwei <= cts.MARKETPLACE_MIN_GAS_PRICE) {
-			gasPriceGwei = cts.MARKETPLACE_MIN_GAS_PRICE;
-		}
-
-		return {
-			gas: cts.MARKETPLACE_BUY_GAS,
-			gasPrice: gasPriceGwei * 1e9,
-		};
 	}
 
 	public async buyThetan(
@@ -257,10 +265,12 @@ class Marketplace {
 		earnPotentialDollar: number,
 		sellerAddress: string
 	): Promise<any> {
-		const sellerSignature = await this.getSellerSignature(thetanId);
-		const saltNonce = await this.getSaltNonce(thetanId);
-		const { gas, gasPrice } = await this.estimateGas(thetanPrice, earnPotentialDollar);
+		let gasPrice = 0;
+		let gas = 0;
 		try {
+			const sellerSignature = await this.getSellerSignature(thetanId);
+			const saltNonce = await this.getSaltNonce(thetanId);
+			({ gas, gasPrice } = await this.estimateGas(thetanPrice, earnPotentialDollar));
 			const price = BigInt(thetanPrice * 1e10); // price*1e18/1e8;
 			console.log(`Buying thetan ${thetanId} for ${parseInt(thetanPrice.toString()) / 1e18} WBNB`);
 			const tx = await this.thetanContract.methods

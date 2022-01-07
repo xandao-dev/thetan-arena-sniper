@@ -52,14 +52,17 @@ class CoinWatcher extends Watcher {
 
 			return req.data.data;
 		} catch (e: any) {
-			console.error(`Error fetching ${coin} price. ${e}`);
-			return 0;
+			throw new Error(`Error fetching ${coin} price. ${e}`);
 		}
 	}
 
 	protected async fetchData(): Promise<void> {
-		for (const coin of ['BNB', 'THC']) {
-			this.coins[coin as Coin] = await this.fetchCoin(coin as Coin);
+		try {
+			for (const coin of ['BNB', 'THC']) {
+				this.coins[coin as Coin] = await this.fetchCoin(coin as Coin);
+			}
+		} catch (e: any) {
+			throw new Error(`Failed to fetch coins: ${e.message}`);
 		}
 	}
 }

@@ -130,8 +130,8 @@ async function tradeRoutine(
 		return bestThetans.sort((a, b) => b.earnRate - a.earnRate);
 	}
 
-	async function verifyBalances(bestThetans: any[]) {
-		if (walletWatcher.balance.WBNB < bestThetans[0].price / 1e8) {
+	async function verifyBalances(thetan: any) {
+		if (walletWatcher.balance.WBNB < thetan.price / 1e8) {
 			console.log('Not enough WBNB balance! Updating balance...');
 			await walletWatcher.update();
 			beeper(1);
@@ -141,6 +141,7 @@ async function tradeRoutine(
 			const buyAmount = cts.MARKETPLACE_MAX_GAS_PRICE * cts.MARKETPLACE_BUY_GAS * 1e-9 * 2;
 			logger.warn(`Not enough BNB balance, buying ${buyAmount} BNB!`);
 			await wallet.unwrapBNB(buyAmount);
+			await walletWatcher.update();
 			beeper(1);
 			return false;
 		}
@@ -193,9 +194,11 @@ FAILED to buy ${thetan.name}(${thetan.id}):
 			bestThetans = orderThetansByEarnRate(bestThetans);
 
 			if (bestThetans && bestThetans.length > 0) {
-				const isBalanceValid = await verifyBalances(bestThetans);
+				const isBalanceValid = await verifyBalances(bestThetans[0]);
 				if (!isBalanceValid) continue;
 				await buyThetan(bestThetans[0]);
+				await walletWatcher.update();
+				await verifyBalances(bestThetans[0]); // Buy gas if needed
 				lastGoodThetansIds.push(...bestThetans.map((hero) => hero.id));
 			}
 		} catch (e: any) {

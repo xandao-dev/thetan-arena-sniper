@@ -12,7 +12,11 @@ abstract class Watcher {
 	protected abstract fetchData(): Promise<void>;
 
 	public async update(): Promise<void> {
-		await this.fetchData();
+		try {
+			await this.fetchData();
+		} catch (e: any) {
+			throw new Error(`Failed to fetch data: ${e.message}`);
+		}
 	}
 
 	public async start(): Promise<void> {
@@ -21,10 +25,14 @@ abstract class Watcher {
 		}
 		this.started = true;
 
-		await this.fetchData();
-		this.intervalTimer = setIntervalAsync(async () => {
+		try {
 			await this.fetchData();
-		}, this.fetchInterval);
+			this.intervalTimer = setIntervalAsync(async () => {
+				await this.fetchData();
+			}, this.fetchInterval);
+		} catch (e: any) {
+			throw new Error(`Failed to start watcher: ${e.message}`);
+		}
 	}
 
 	public async stop(): Promise<void> {

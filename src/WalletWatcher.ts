@@ -21,8 +21,12 @@ class WalletWatcher extends Watcher {
 	}
 
 	protected async fetchData(): Promise<void> {
-		for (const coin of ['BNB', 'WBNB']) {
-			this.balance[coin as Coin] = await this.wallet.getBalance(coin as Coin);
+		try {
+			for (const coin of ['BNB', 'WBNB']) {
+				this.balance[coin as Coin] = await this.wallet.getBalance(coin as Coin);
+			}
+		} catch (e: any) {
+			throw new Error(`Failed to fetch wallet balance: ${e.message}`);
 		}
 	}
 }

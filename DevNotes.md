@@ -17,5 +17,3 @@ Marketplace:
 IMP: Saldo mínimo para rodar
 IMP: Deixar constantes mais fáceis de trocar
 OBS: Não ignorar a taxa de 4.15% de vender no mercado e nem o valor do gás
-OBS: Comprar gás depois de uma operação, para não perder a oportunidade igual fazemos hoje
-FIX: reiniciar app, mas não fazer login de novo, lidar melhor com os erros
