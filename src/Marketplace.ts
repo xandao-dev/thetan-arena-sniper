@@ -233,7 +233,7 @@ class Marketplace {
 			// We sell based on earnPotentialDollar (controlled by win rate)
 			// The profit is affected by the marketplace fee
 			const thetanPriceDollar = (thetanPrice / 1e8) * this.coinWatcher.coins.BNB;
-			const thetanSellProfit = thetanPriceDollar - earnPotentialDollar / (1 - cts.MARKETPLACE_SELL_FEE);
+			const thetanSellProfit = earnPotentialDollar / (1 - cts.MARKETPLACE_SELL_FEE) - thetanPriceDollar;
 
 			const minimumGasDollar = gasPriceGweiToDollar(cts.MARKETPLACE_MIN_GAS_PRICE);
 			if (thetanSellProfit <= minimumGasDollar) {
