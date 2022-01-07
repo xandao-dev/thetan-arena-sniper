@@ -39,7 +39,7 @@ async function main() {
 		const coinWatcher = new CoinWatcher();
 		await coinWatcher.start();
 
-		const marketplace = new Marketplace(web3, wallet);
+		const marketplace = new Marketplace(web3, wallet, coinWatcher);
 		await marketplace.connect();
 
 		await tradeRoutine(wallet, walletWatcher, coinWatcher, marketplace, earnExpectPercentage);
@@ -148,7 +148,13 @@ async function tradeRoutine(
 	}
 
 	async function buyThetan(thetan: any) {
-		const result = await marketplace.buyThetan(thetan.id, thetan.tokenId, thetan.price, thetan.ownerAddress);
+		const result = await marketplace.buyThetan(
+			thetan.id,
+			thetan.tokenId,
+			thetan.price,
+			thetan.earnPotentialDollar,
+			thetan.ownerAddress
+		);
 		if (result.success) {
 			await beeper('*-*-*');
 			logger.info(`

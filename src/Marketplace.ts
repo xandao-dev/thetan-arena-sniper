@@ -12,6 +12,7 @@ import {
 	THETAN_HERO_CONTRACT_ADDRESS,
 	WBNB_CONTRACT_ADDRESS,
 } from './utils/contracts.js';
+import { CoinWatcher } from './CoinWatcher.js';
 
 interface IGas {
 	gas: number;
@@ -20,21 +21,26 @@ interface IGas {
 
 class Marketplace {
 	private wallet: Wallet;
+	private coinWatcher: CoinWatcher;
 	private web3: Web3;
 	private bearer?: string;
 	private connectIntervalTimer?: SetIntervalAsyncTimer;
 	private connected: boolean = false;
 	private thetanContract: Contract;
 
-	constructor(web3: Web3, wallet: Wallet) {
+	constructor(web3: Web3, wallet: Wallet, coinWatcher: CoinWatcher) {
 		if (!web3) {
 			throw new Error('Web3 is not set');
 		}
 		if (!wallet) {
 			throw new Error('Wallet not set');
 		}
+		if (!coinWatcher) {
+			throw new Error('Coin watcher not set');
+		}
 		this.web3 = web3;
 		this.wallet = wallet;
+		this.coinWatcher = coinWatcher;
 		this.thetanContract = new web3.eth.Contract(MARKETPLACE_ABI, MARKETPLACE_CONTRACT_ADDRESS);
 	}
 
@@ -212,10 +218,35 @@ class Marketplace {
 		}
 	}
 
-	private async estimateGas(): Promise<IGas> {
+	private async estimateGas(thetanPrice: number, earnPotentialDollar: number): Promise<IGas> {
+		const gasPriceGweiToDollar = (gwei: number) =>
+			(cts.MARKETPLACE_BUY_GAS * gwei * this.coinWatcher.coins.BNB) / 1e9;
+
+		const dollarToGasPriceGwei = (dollar: number) =>
+			Math.round((dollar * 1e9) / (cts.MARKETPLACE_BUY_GAS * this.coinWatcher.coins.BNB));
+
+		// We sell based on earnPotentialDollar (controlled by win rate)
+		// The profit is affected by the marketplace fee
+		const thetanPriceDollar = (thetanPrice / 1e8) * this.coinWatcher.coins.BNB;
+		const thetanSellProfit = thetanPriceDollar - earnPotentialDollar / (1 - cts.MARKETPLACE_SELL_FEE);
+
+		const minimumGasDollar = gasPriceGweiToDollar(cts.MARKETPLACE_MIN_GAS_PRICE);
+		if (thetanSellProfit <= minimumGasDollar) {
+			throw new Error(`Thetan sell profit is negative (${thetanSellProfit})`);
+		}
+
+		// We set gas price based on a percentage of the thetanSellProfit
+		let gasPriceGwei = dollarToGasPriceGwei(thetanSellProfit * cts.MARKETPLACE_PROFIT_TO_GAS_RATIO);
+		if (gasPriceGwei >= cts.MARKETPLACE_MAX_GAS_PRICE) {
+			gasPriceGwei = cts.MARKETPLACE_MAX_GAS_PRICE;
+		}
+		if (gasPriceGwei <= cts.MARKETPLACE_MIN_GAS_PRICE) {
+			gasPriceGwei = cts.MARKETPLACE_MIN_GAS_PRICE;
+		}
+
 		return {
-			gas: 300000,
-			gasPrice: 45 * 1e9,
+			gas: cts.MARKETPLACE_BUY_GAS,
+			gasPrice: gasPriceGwei * 1e9,
 		};
 	}
 
@@ -223,11 +254,12 @@ class Marketplace {
 		thetanId: string,
 		tokenId: string,
 		thetanPrice: number,
+		earnPotentialDollar: number,
 		sellerAddress: string
 	): Promise<any> {
 		const sellerSignature = await this.getSellerSignature(thetanId);
 		const saltNonce = await this.getSaltNonce(thetanId);
-		const { gas, gasPrice } = await this.estimateGas();
+		const { gas, gasPrice } = await this.estimateGas(thetanPrice, earnPotentialDollar);
 		try {
 			const price = BigInt(thetanPrice * 1e10); // price*1e18/1e8;
 			console.log(`Buying thetan ${thetanId} for ${parseInt(thetanPrice.toString()) / 1e18} WBNB`);

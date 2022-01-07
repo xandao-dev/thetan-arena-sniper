@@ -11,13 +11,11 @@ Wallet:
 
 Marketplace:
 	1. Não é mais responsável por verificar o saldo.
-	2. *Falta estimar o gas corretamente
-	3. *Falta o método de vender o NFT
+	2. *Falta o método de vender o NFT
 
-
-BUG: Mesmo comprando ta mostrando que falhou
 
 IMP: Saldo mínimo para rodar
 IMP: Deixar constantes mais fáceis de trocar
-
 OBS: Não ignorar a taxa de 4.15% de vender no mercado e nem o valor do gás
+OBS: Comprar gás depois de uma operação, para não perder a oportunidade igual fazemos hoje
+FIX: reiniciar app, mas não fazer login de novo, lidar melhor com os erros
