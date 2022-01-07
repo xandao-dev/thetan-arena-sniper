@@ -97,7 +97,7 @@ async function tradeRoutine(
 
 			if (earnRate >= earnExpectPercentage) {
 				bestThetans[index].earnPotentialDollar = earnPotential.toFixed(2);
-				bestThetans[index].earnRatePercentage = (earnRate * 100).toFixed(2);
+				bestThetans[index].earnRate = earnRate;
 				bestThetans[index].heroPriceDollar = ((hero.price * coinWatcher.coins.BNB) / 1e8).toFixed(2);
 			}
 			return earnRate >= earnExpectPercentage;
@@ -107,7 +107,7 @@ async function tradeRoutine(
 		// *Remove unwanted thetans*
 		bestThetans = bestThetans.filter((hero) => {
 			// Increase difficulty of getting shitty Veinkas
-			if (hero.name === 'Veinka' && hero.earnRatePercentage < earnExpectPercentage * 1.5) {
+			if (hero.name === 'Veinka' && hero.earnRate < earnExpectPercentage * 1.3) {
 				return false;
 			}
 			return hero;
@@ -127,7 +127,7 @@ async function tradeRoutine(
 	}
 
 	function orderThetansByEarnRate(bestThetans: any[]) {
-		return bestThetans.sort((a, b) => b.earnRatePercentage - a.earnRatePercentage);
+		return bestThetans.sort((a, b) => b.earnRate - a.earnRate);
 	}
 
 	async function verifyBalances(bestThetans: any[]) {
@@ -160,7 +160,7 @@ SUCCESSFULLY bought ${thetan.name}(${thetan.id}):
 	Price: $${thetan.heroPriceDollar}; WBNB ${thetan.price / 1e8}
 	Price Total (gas + price): WBNB${(thetan.price / 1e8 + (result.tx.gasUsed * result.gasPrice) / 1e9).toFixed(6)}}}
 	Earn Potential: $${thetan.earnPotentialDollar}
-	Earn Rate: ${thetan.earnRatePercentage}%
+	Earn Rate: ${(thetan.earnRate * 100).toFixed(2)}%
 	Link: https://marketplace.thetanarena.com/item/${thetan.refId}`);
 			await walletWatcher.update();
 		} else {
@@ -174,7 +174,7 @@ FAILED to buy ${thetan.name}(${thetan.id}):
 	Gas Price: ${result?.tx?.gasPrice}
 	Price: $${thetan.heroPriceDollar}; WBNB ${thetan.price / 1e8}
 	Earn Potential: $${thetan.earnPotentialDollar}
-	Earn Rate: ${thetan.earnRatePercentage}%
+	Earn Rate: ${(thetan.earnRate * 100).toFixed(2)}%
 	Link: https://marketplace.thetanarena.com/item/${thetan.refId}`);
 		}
 	}
