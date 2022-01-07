@@ -143,6 +143,8 @@ class Marketplace {
 		} catch (e: any) {
 			throw new Error(`Error logging in: ${e.message}`);
 		}
+
+		console.log(`Logged in to marketplace - Bearer: ${bearer}`);
 		return bearer;
 	}
 
@@ -178,6 +180,7 @@ class Marketplace {
 			if (!req.data?.data) {
 				throw new Error(`API error: no seller signature returned`);
 			}
+			console.log(`Seller signature: ${req.data.data}`);
 			return req.data.data;
 		} catch (e: any) {
 			throw new Error(`Error getting seller signature: ${e.message}`);
@@ -216,6 +219,7 @@ class Marketplace {
 			if (req.data?.data?.saltNonce === undefined) {
 				throw new Error(`API error: no saltNonce returned`);
 			}
+			console.log(`SaltNonce: ${req.data.data.saltNonce}`);
 			return req.data.data.saltNonce;
 		} catch (e: any) {
 			throw new Error(`Error getting saltNonce: ${e.message}`);
@@ -248,6 +252,8 @@ class Marketplace {
 			if (gasPriceGwei <= cts.MARKETPLACE_MIN_GAS_PRICE) {
 				gasPriceGwei = cts.MARKETPLACE_MIN_GAS_PRICE;
 			}
+
+			console.log(`Estimated gas price: ${gasPriceGwei} Gwei`);
 
 			return {
 				gas: cts.MARKETPLACE_BUY_GAS,

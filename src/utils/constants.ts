@@ -14,7 +14,7 @@ const cts = {
 	BATTLE_WIN_RATE: 0.4, // https://thetanarenatool.io/
 	THETAN_RARITY_WIN_REWARDS_PER_BATTLE_THC: [9.25, 12.5, 29.55],
 	MIN_THETAN_PRICE_WBNB: 0, // 0$
-	MAX_THETAN_PRICE_WBNB: 0.12, // +- 50$ (WBNB at 480$)
+	MAX_THETAN_PRICE_WBNB: 0.15, // +- 60$ (WBNB at 480$)
 };
 
 export { cts };
