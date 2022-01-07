@@ -215,7 +215,7 @@ class Marketplace {
 	private async estimateGas(): Promise<IGas> {
 		return {
 			gas: 300000,
-			gasPrice: 20 * 1e9,
+			gasPrice: 45 * 1e9,
 		};
 	}
 
@@ -238,15 +238,15 @@ class Marketplace {
 					sellerSignature
 				)
 				.send({ from: this.wallet.address, gas, gasPrice });
-			console.log(`MAYBE we successfully bought thetan ${thetanId}`);
-			return tx;
-		} catch (e: any) {
-			console.log(`Failed to buy thetan ${thetanId} for ${parseInt(thetanPrice.toString()) / 1e8}`);
 			return {
-				status: 'error',
+				success: true,
+				tx: { ...tx, gasPrice: gasPrice / 1e9 },
+			};
+		} catch (e: any) {
+			return {
+				success: false,
 				message: e.message,
-				thetanId,
-				thetanPrice: parseInt(thetanPrice.toString()) / 1e8,
+				tx: { ...e, gasPrice: gasPrice / 1e9 },
 			};
 		}
 	}
