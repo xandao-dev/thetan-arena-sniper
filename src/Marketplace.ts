@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
-import axios from 'axios';
+import { request } from 'undici';
 import { setIntervalAsync } from 'set-interval-async/dynamic/index.js';
 import { clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async';
 import { Wallet } from './Wallet.js';
@@ -69,35 +69,37 @@ class Marketplace {
 	private async login(): Promise<string> {
 		let loginNonce = '';
 		try {
-			const loginNonceReq = await axios({
-				url: `https://data.thetanarena.com/thetan/v1/authentication/nonce?Address=${this.wallet.address}`,
-				method: 'GET',
-				headers: {
-					Accept: 'application/json',
-					'accept-language': 'en-US,en;q=0.9',
-					'cache-control': 'max-age=0',
-					'content-type': 'application/json',
-					'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
-					'sec-ch-ua-mobile': '?0',
-					'sec-ch-ua-platform': '"Linux"',
-					'sec-fetch-dest': 'empty',
-					'sec-fetch-mode': 'cors',
-					'sec-fetch-site': 'same-site',
-					Referer: 'https://marketplace.thetanarena.com/',
-					'Referrer-Policy': 'strict-origin-when-cross-origin',
-				},
-				data: null,
-			});
-			if (loginNonceReq.status !== 200) {
-				throw new Error(`Network error: ${loginNonceReq.status}`);
+			const loginNonceReq = await request(
+				`https://data.thetanarena.com/thetan/v1/authentication/nonce?Address=${this.wallet.address}`,
+				{
+					method: 'GET',
+					headers: {
+						Accept: 'application/json',
+						'accept-language': 'en-US,en;q=0.9',
+						'cache-control': 'max-age=0',
+						'content-type': 'application/json',
+						'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
+						'sec-ch-ua-mobile': '?0',
+						'sec-ch-ua-platform': '"Linux"',
+						'sec-fetch-dest': 'empty',
+						'sec-fetch-mode': 'cors',
+						'sec-fetch-site': 'same-site',
+						Referer: 'https://marketplace.thetanarena.com/',
+						'Referrer-Policy': 'strict-origin-when-cross-origin',
+					},
+				}
+			);
+			if (loginNonceReq.statusCode !== 200) {
+				throw new Error(`Network error: ${loginNonceReq.statusCode}`);
 			}
-			if (!loginNonceReq.data.success) {
-				throw new Error(`API error: ${loginNonceReq.data?.code} - ${loginNonceReq.data?.status}`);
+			const loginNonceJson = await loginNonceReq.body.json();
+			if (!loginNonceJson.success) {
+				throw new Error(`API error: ${loginNonceJson?.data} - ${loginNonceJson?.errors}`);
 			}
-			if (!loginNonceReq.data?.data?.nonce) {
+			if (!loginNonceJson?.data?.nonce) {
 				throw new Error(`API error: no nonce returned`);
 			}
-			loginNonce = String(loginNonceReq.data.data.nonce);
+			loginNonce = String(loginNonceJson.data.nonce);
 		} catch (e: any) {
 			throw new Error(`Error getting nonce: ${e.message}`);
 		}
@@ -111,8 +113,7 @@ class Marketplace {
 
 		let bearer = '';
 		try {
-			const loginReq = await axios({
-				url: 'https://data.thetanarena.com/thetan/v1/authentication/token',
+			const loginReq = await request('https://data.thetanarena.com/thetan/v1/authentication/token', {
 				method: 'POST',
 				headers: {
 					accept: 'application/json',
@@ -128,18 +129,19 @@ class Marketplace {
 					Referer: 'https://marketplace.thetanarena.com/',
 					'Referrer-Policy': 'strict-origin-when-cross-origin',
 				},
-				data: `{"address":"${this.wallet.address}","signature": "${userSignature}"}`,
+				body: `{"address":"${this.wallet.address}","signature": "${userSignature}"}`,
 			});
-			if (loginReq.status !== 200) {
-				throw new Error(`Network error: ${loginReq.status}`);
+			if (loginReq.statusCode !== 200) {
+				throw new Error(`Network error: ${loginReq.statusCode}`);
 			}
-			if (!loginReq.data.success) {
-				throw new Error(`API error: ${loginReq.data?.code} - ${loginReq.data?.status}`);
+			const loginJson = await loginReq.body.json();
+			if (!loginJson.success) {
+				throw new Error(`API error: ${loginJson?.data} - ${loginJson?.errors}`);
 			}
-			if (!loginReq.data?.data?.accessToken) {
+			if (!loginJson?.data?.accessToken) {
 				throw new Error(`API error: no bearer returned`);
 			}
-			bearer = String(loginReq.data.data.accessToken);
+			bearer = String(loginJson.data.accessToken);
 		} catch (e: any) {
 			throw new Error(`Error logging in: ${e.message}`);
 		}
@@ -150,38 +152,39 @@ class Marketplace {
 
 	private async getSellerSignature(thetanId: string): Promise<string> {
 		try {
-			const req = await axios({
-				url: `https://data.thetanarena.com/thetan/v1/items/${thetanId}/signed-signature?id=${thetanId}`,
-				method: 'GET',
-				headers: {
-					accept: 'application/json',
-					'accept-language': 'en-US,en;q=0.9',
-					authorization: `Bearer ${this.bearer}`,
-					'cache-control': 'max-age=0',
-					'content-type': 'application/json',
-					'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
-					'sec-ch-ua-mobile': '?0',
-					'sec-ch-ua-platform': '"Linux"',
-					'sec-fetch-dest': 'empty',
-					'sec-fetch-mode': 'cors',
-					'sec-fetch-site': 'same-site',
-					Referer: 'https://marketplace.thetanarena.com/',
-					'Referrer-Policy': 'strict-origin-when-cross-origin',
-				},
-				data: null,
-				withCredentials: true,
-			});
-			if (req.status !== 200) {
-				throw new Error(`Network error: ${req.status}`);
+			const { statusCode, body } = await request(
+				`https://data.thetanarena.com/thetan/v1/items/${thetanId}/signed-signature?id=${thetanId}`,
+				{
+					method: 'GET',
+					headers: {
+						accept: 'application/json',
+						'accept-language': 'en-US,en;q=0.9',
+						authorization: `Bearer ${this.bearer}`,
+						'cache-control': 'max-age=0',
+						'content-type': 'application/json',
+						'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
+						'sec-ch-ua-mobile': '?0',
+						'sec-ch-ua-platform': '"Linux"',
+						'sec-fetch-dest': 'empty',
+						'sec-fetch-mode': 'cors',
+						'sec-fetch-site': 'same-site',
+						Referer: 'https://marketplace.thetanarena.com/',
+						'Referrer-Policy': 'strict-origin-when-cross-origin',
+					},
+				}
+			);
+			if (statusCode !== 200) {
+				throw new Error(`Network error: ${statusCode}`);
 			}
-			if (!req.data.success) {
-				throw new Error(`API error: ${req.data.code} - ${req.data.status}`);
+			const json = await body.json();
+			if (!json.success) {
+				throw new Error(`API error: ${json?.data} - ${json?.errors}`);
 			}
-			if (!req.data?.data) {
+			if (!json?.data) {
 				throw new Error(`API error: no seller signature returned`);
 			}
-			console.log(`Seller signature: ${req.data.data}`);
-			return req.data.data;
+			console.log(`Seller signature: ${json.data}`);
+			return json.data;
 		} catch (e: any) {
 			throw new Error(`Error getting seller signature: ${e.message}`);
 		}
@@ -189,38 +192,39 @@ class Marketplace {
 
 	private async getSaltNonce(thetanId: string): Promise<number> {
 		try {
-			const req = await axios({
-				url: `https://data.thetanarena.com/thetan/v1/items/${thetanId}?id=${thetanId}`,
-				method: 'GET',
-				headers: {
-					accept: 'application/json',
-					'accept-language': 'en-US,en;q=0.9',
-					authorization: `Bearer ${this.bearer}`,
-					'cache-control': 'max-age=0',
-					'content-type': 'application/json',
-					'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
-					'sec-ch-ua-mobile': '?0',
-					'sec-ch-ua-platform': '"Linux"',
-					'sec-fetch-dest': 'empty',
-					'sec-fetch-mode': 'cors',
-					'sec-fetch-site': 'same-site',
-					Referer: 'https://marketplace.thetanarena.com/',
-					'Referrer-Policy': 'strict-origin-when-cross-origin',
-				},
-				data: null,
-				withCredentials: true,
-			});
-			if (req.status !== 200) {
-				throw new Error(`Network error: ${req.status}`);
+			const { statusCode, body } = await request(
+				`https://data.thetanarena.com/thetan/v1/items/${thetanId}?id=${thetanId}`,
+				{
+					method: 'GET',
+					headers: {
+						accept: 'application/json',
+						'accept-language': 'en-US,en;q=0.9',
+						authorization: `Bearer ${this.bearer}`,
+						'cache-control': 'max-age=0',
+						'content-type': 'application/json',
+						'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
+						'sec-ch-ua-mobile': '?0',
+						'sec-ch-ua-platform': '"Linux"',
+						'sec-fetch-dest': 'empty',
+						'sec-fetch-mode': 'cors',
+						'sec-fetch-site': 'same-site',
+						Referer: 'https://marketplace.thetanarena.com/',
+						'Referrer-Policy': 'strict-origin-when-cross-origin',
+					},
+				}
+			);
+			if (statusCode !== 200) {
+				throw new Error(`Network error: ${statusCode}`);
 			}
-			if (!req.data.success) {
-				throw new Error(`API error: ${req.data.code} - ${req.data.status}`);
+			const json = await body.json();
+			if (!json.success) {
+				throw new Error(`API error: ${json?.data} - ${json?.errors}`);
 			}
-			if (req.data?.data?.saltNonce === undefined) {
+			if (json?.data?.saltNonce === undefined) {
 				throw new Error(`API error: no saltNonce returned`);
 			}
-			console.log(`SaltNonce: ${req.data.data.saltNonce}`);
-			return req.data.data.saltNonce;
+			console.log(`SaltNonce: ${json.data.saltNonce}`);
+			return json.data.saltNonce;
 		} catch (e: any) {
 			throw new Error(`Error getting saltNonce: ${e.message}`);
 		}
@@ -304,20 +308,21 @@ class Marketplace {
 	public async getThetans(): Promise<any[]> {
 		try {
 			const startTime = process.hrtime();
-			const req = await axios.get(urls.GET_THETANS);
+			const { statusCode, body } = await request(urls.GET_THETANS);
 			const endTime = process.hrtime(startTime);
 			console.log(`listThetans took ${endTime[0] * 1000 + endTime[1] / 1000000}ms`);
 
-			if (req.status !== 200) {
-				throw new Error(`Network error: ${req.status}`);
+			if (statusCode !== 200) {
+				throw new Error(`Network error: ${statusCode}`);
 			}
-			if (!req.data.success) {
-				throw new Error(`API error: ${req.data.code} - ${req.data.status}`);
+			const json = await body.json();
+			if (!json.success) {
+				throw new Error(`API error: ${json?.data} - ${json?.errors}`);
 			}
-			if (!req.data?.data) {
+			if (!json?.data) {
 				throw new Error(`API error: no thetans returned`);
 			}
-			return req.data.data;
+			return json.data;
 		} catch (error) {
 			console.log(`Error getting thetans: ${error}`);
 			return [];

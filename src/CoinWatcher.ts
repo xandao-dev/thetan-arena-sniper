@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { request } from 'undici';
 import { urls } from './utils/urls.js';
 import { cts } from './utils/constants.js';
 import { Watcher } from './Watcher.js';
@@ -21,8 +21,7 @@ class CoinWatcher extends Watcher {
 
 	private async fetchCoin(coin: Coin): Promise<number> {
 		try {
-			const req = await axios({
-				url: urls[`GET_${coin}_PRICE`],
+			const { statusCode, body } = await request(urls[`GET_${coin}_PRICE`], {
 				method: 'GET',
 				headers: {
 					Accept: 'application/json',
@@ -38,19 +37,20 @@ class CoinWatcher extends Watcher {
 					Referer: 'https://marketplace.thetanarena.com/',
 					'Referrer-Policy': 'strict-origin-when-cross-origin',
 				},
-				data: null,
 			});
-			if (req.status !== 200) {
-				throw new Error(`Network error: ${req.status}`);
+			if (statusCode !== 200) {
+				throw new Error(`Network error: ${statusCode}`);
 			}
-			if (!req.data.success) {
-				throw new Error(`API error: ${req.data.code} - ${req.data.status}`);
+			const json = await body.json();
+			if (!json.success) {
+				throw new Error(`API error: ${json?.data} - ${json?.errors}`);
 			}
-			if (!req.data.data) {
+			if (!json?.data) {
 				throw new Error(`API error: no price returned`);
 			}
 
-			return req.data.data;
+			console.log(`[UPDATE]${coin} price: ${json.data}`);
+			return json.data;
 		} catch (e: any) {
 			throw new Error(`Error fetching ${coin} price. ${e}`);
 		}
