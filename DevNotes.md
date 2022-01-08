@@ -18,4 +18,3 @@ IMP: Saldo mínimo para rodar
 IMP: Deixar constantes mais fáceis de trocar
 OBS: Não ignorar a taxa de 4.15% de vender no mercado e nem o valor do gás
 BUG: Transação repetiu 3x (perdi taxas 3x) -> Por causa do PM2, usar padrão Either
-IMP: Ignorar primeira listagem

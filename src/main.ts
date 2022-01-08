@@ -186,24 +186,28 @@ FAILED to buy ${thetan.name}(${thetan.id}):
 		}
 	}
 
+	let iterations = 0;
 	while (true) {
-		try {
-			const thetans = await marketplace.getThetans();
-			let bestThetans = await getBestThetans(thetans);
-			bestThetans = filterAlreadyListedThetans(bestThetans);
-			bestThetans = orderThetansByEarnRate(bestThetans);
+		const thetans = await marketplace.getThetans();
+		let bestThetans = await getBestThetans(thetans);
+		bestThetans = filterAlreadyListedThetans(bestThetans);
+		bestThetans = orderThetansByEarnRate(bestThetans);
 
-			if (bestThetans && bestThetans.length > 0) {
-				const isBalanceValid = await verifyBalances(bestThetans[0]);
-				if (!isBalanceValid) continue;
-				await buyThetan(bestThetans[0]);
-				await walletWatcher.update();
-				await verifyBalances(bestThetans[0]); // Buy gas if needed
+		if (bestThetans && bestThetans.length > 0) {
+			// Ignore the first thetans, they maybe are already bought
+			if (iterations < 5) {
 				lastGoodThetansIds.push(...bestThetans.map((hero) => hero.id));
+				continue;
 			}
-		} catch (e: any) {
-			logger.error(`Error with trade routine: ${e.message}`);
+
+			const isBalanceValid = await verifyBalances(bestThetans[0]);
+			if (!isBalanceValid) continue;
+			await buyThetan(bestThetans[0]);
+			await walletWatcher.update();
+			await verifyBalances(bestThetans[0]); // Buy gas if needed
+			lastGoodThetansIds.push(...bestThetans.map((hero) => hero.id));
 		}
+		iterations++;
 	}
 }
 
