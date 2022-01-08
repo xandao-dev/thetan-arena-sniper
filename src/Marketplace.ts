@@ -251,7 +251,7 @@ class Marketplace {
 			// We set gas price based on a percentage of the thetanSellProfit
 			let gasPriceGwei = dollarToGasPriceGwei(thetanSellProfit * cts.MARKETPLACE_PROFIT_TO_GAS_RATIO);
 			if (gasPriceGwei >= cts.MARKETPLACE_MAX_GAS_PRICE) {
-				gasPriceGwei = cts.MARKETPLACE_MAX_GAS_PRICE;
+				throw new Error(`Gas price is too high (${gasPriceGwei})`);
 			}
 			if (gasPriceGwei <= cts.MARKETPLACE_MIN_GAS_PRICE) {
 				gasPriceGwei = cts.MARKETPLACE_MIN_GAS_PRICE;
