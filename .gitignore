@@ -3,3 +3,4 @@ node_modules
 other/
 dist/
 logs/
+credentials/

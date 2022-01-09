@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "ts-node-dev ./src/main.ts",
     "prod": "node dist/main.js",
-    "build": "tsc -p . && cp -r ./node_modules/ ./dist/"
+    "build": "tsc -p ."
   },
   "license": "UNLICENSED",
   "dependencies": {
