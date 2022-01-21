@@ -63,14 +63,13 @@
 ### Introduction
 
 There are a few things you need to know before using the bot. There are some variables that can be changed according to 
-your need, they are in src/utils/constants.js.
+your need, they are in [constants file](./src/utils/constants.ts).
 
 First, this bot selects the cheap characters through the Expected Earn Rate which is the percentage of profit in 
 relation to the purchase price and the possible sale price.
 
-The sales price estimate is based on how much profit a character can generate. I think it's a good estimate the sale 
-price to be the same value that the character manages to generate profit when the win rate is 40%. you can adjust
-this value in the constants file in BATTLE_WIN_RATE. You can check how much the character generates by 40% in the 
+The sales price estimate is based on how much profit a character can generate. When the win rate is 40%, we estimate 
+the sale price to the same amount which would make the character generate a profit. You can adjust this value in the [constants file](./src/utils/constants.ts) in BATTLE_WIN_RATE. You can check how much the character generates by 40% in the 
 [Thetan Arena Tool](https://thetanarenatool.io/).
 
 These are the constants I recommend tweaking:
@@ -88,7 +87,7 @@ MARKETPLACE_BUY_GAS at 240000 and a max gas of 0.1BNB, the MARKETPLACE_MAX_GAS_P
 ### Tips
 
 I recommend placing the bot on a server in the US to be closer to the game server and thus be able to see the 
-characters faster. I used an EC2 from Amazon AWS.
+characters faster. I used an EC2 from Amazon AWS at the us-east-1 location.
 
 ### Features
 
@@ -173,7 +172,7 @@ Install Thetan Arena Sniper in EC2 Server:
 
 10. Run application: `pm2 start main.js -- 0.3`
 
-11. Monit with `pm2 monit`
+11. Monitor with `pm2 monit`
 
 
 <!-- USAGE EXAMPLES -->
@@ -220,7 +219,10 @@ Contributions are what make the open source community such an amazing place to b
 <!-- LICENSE -->
 ## License
 
-All rights reserved.
+Distributed under the MIT License. See [LICENSE](./LICENSE.md) for more information.
+
+Free software =)
+
 
 <!-- CONTACT -->
 ## Contact
