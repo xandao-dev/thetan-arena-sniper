@@ -1,6 +1,6 @@
 import { request } from 'undici';
 import { urls } from './utils/urls.js';
-import { cts } from './utils/constants.js';
+import { cts } from './configs.js';
 import { Watcher } from './Watcher.js';
 
 interface ICoins {

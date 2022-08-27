@@ -1,10 +1,11 @@
-import { cts } from './utils/constants.js';
+import { cts } from './configs.js';
 import { Watcher } from './Watcher.js';
 import { Wallet } from './Wallet.js';
 
 interface ICoins {
 	BNB: number;
 	WBNB: number;
+	THC: number;
 }
 type Coin = keyof ICoins;
 
@@ -16,13 +17,14 @@ class WalletWatcher extends Watcher {
 		this.balance = {
 			BNB: 0,
 			WBNB: 0,
+			THC: 0,
 		};
 		this.wallet = wallet;
 	}
 
 	protected async fetchData(): Promise<void> {
 		try {
-			for (const coin of ['BNB', 'WBNB']) {
+			for (const coin of ['BNB', 'WBNB', 'THC']) {
 				this.balance[coin as Coin] = await this.wallet.getBalance(coin as Coin);
 			}
 		} catch (e: any) {

@@ -129,7 +129,6 @@ To get a local copy up and running follow these simple steps.
    * WALLET_PRIVATE_KEY - Your wallet private key, you can find it on Metamask -> Account Details -> Export Private Key
                           You should append the 0x to the private key.
                           I recommend creating a new wallet just for this project, fill with some BNB for gas and with WBNB to buy thetans.
-   * IS_TESTNET -> Set it to false if you are using mainnet on BSC_PROVIDER
 
 4. Install pm2 to run the application as a service
   ```sh
@@ -170,7 +169,7 @@ Install Thetan Arena Sniper in EC2 Server:
 
 9.  Install pm2: `npm install pm2 -g`
 
-10. Run application: `pm2 start main.js -- 0.3`
+10. Run application: `pm2 start main.js -- 0.3 --stop-exit-codes 0`
 
 11. Monitor with `pm2 monit`
 
@@ -222,7 +221,6 @@ Contributions are what make the open source community such an amazing place to b
 Distributed under the MIT License. See [LICENSE](./LICENSE.md) for more information.
 
 Free software =)
-
 
 <!-- CONTACT -->
 ## Contact

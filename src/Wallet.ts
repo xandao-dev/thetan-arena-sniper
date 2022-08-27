@@ -1,11 +1,19 @@
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
-import { WBNB_ABI, WBNB_CONTRACT_ADDRESS } from './utils/contracts.js';
-import { cts } from './utils/constants.js';
+import {
+	WBNB_ABI,
+	WBNB_CONTRACT_ADDRESS,
+	PANCAKE_ROUTER_ABI,
+	PANCAKE_ROUTER_ADDRESS,
+	THETAN_COIN_ABI,
+	THETAN_COIN_CONTRACT_ADDRESS,
+} from './utils/contracts.js';
+import { cts } from './configs.js';
 
 interface ICoins {
 	BNB: number;
 	WBNB: number;
+	THC: number;
 }
 type Coin = keyof ICoins;
 
@@ -13,6 +21,8 @@ class Wallet {
 	readonly address: string;
 	readonly privateKey: string;
 	readonly wbnbContract: Contract;
+	readonly pancakeRouterContract: Contract;
+	readonly thcContract: Contract;
 	private web3: Web3;
 
 	constructor(web3: Web3) {
@@ -28,6 +38,8 @@ class Wallet {
 		this.address = account.address;
 		this.privateKey = account.privateKey;
 		this.wbnbContract = new web3.eth.Contract(WBNB_ABI, WBNB_CONTRACT_ADDRESS);
+		this.pancakeRouterContract = new web3.eth.Contract(PANCAKE_ROUTER_ABI, PANCAKE_ROUTER_ADDRESS);
+		this.thcContract = new web3.eth.Contract(THETAN_COIN_ABI, THETAN_COIN_CONTRACT_ADDRESS);
 	}
 
 	public async getBalance(coin: Coin): Promise<number> {
@@ -38,6 +50,11 @@ class Wallet {
 			if (coin === 'WBNB') {
 				return parseFloat(
 					this.web3.utils.fromWei(await this.wbnbContract.methods.balanceOf(this.address).call())
+				);
+			}
+			if (coin === 'THC') {
+				return parseFloat(
+					this.web3.utils.fromWei(await this.thcContract.methods.balanceOf(this.address).call())
 				);
 			}
 			throw new Error(`Unknown coin: ${coin}`);
@@ -79,6 +96,10 @@ class Wallet {
 		} catch (e: any) {
 			throw new Error(`Error wrapping BNB: ${e.message}`);
 		}
+	}
+
+	public async trade(coin: Coin, toCoin: Coin, amount: number) {
+		// TODO: use pancakeswap contract to trade
 	}
 }
 
