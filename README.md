@@ -2,9 +2,10 @@
 <p align="center">
   <h3 align="center">Thetan Arena Sniper</h3>
   <p align="center">
-  Thetan Arena Sniper is a tool to buy cheap thetans NFTs quickly. It interacts with BSC Blockchain to buy thetans as fast as possible.
+    Thetan Arena Sniper is a tool to buy cheap thetans NFTs quickly. It interacts with BSC Blockchain to buy thetans as fast as possible.
     <br />
-    :warning: It is a tool in development, I am not responsible for financial losses. :warning:
+    :warning: I'ts not working, the contracts has been updated :warning:
+    :warning: I am not responsible for financial losses. :warning:
     <br />
     <br />
     <a href="https://github.com/xandao6/thetan-arena-sniper"><strong>Explore the docs »</strong></a>
@@ -63,26 +64,16 @@
 ### Introduction
 
 There are a few things you need to know before using the bot. There are some variables that can be changed according to 
-your need, they are in [constants file](./src/utils/constants.ts).
+your need, they are in [configs file](./src/configs.ts).
 
 First, this bot selects the cheap characters through the Expected Earn Rate which is the percentage of profit in 
 relation to the purchase price and the possible sale price.
 
 The sales price estimate is based on how much profit a character can generate. When the win rate is 40%, we estimate 
-the sale price to the same amount which would make the character generate a profit. You can adjust this value in the [constants file](./src/utils/constants.ts) in BATTLE_WIN_RATE. You can check how much the character generates by 40% in the 
+the sale price to the same amount which would make the character generate a profit. You can adjust this value in the [configs file](./src/configs.ts) in BATTLE_WIN_RATE. You can check how much the character generates by 40% in the 
 [Thetan Arena Tool](https://thetanarenatool.io/).
 
-These are the constants I recommend tweaking:
-  * MARKETPLACE_BUY_GAS -> The amount of Gwei you can spend, I've generally seen bots using from 200000 to 500000
-  * MARKETPLACE_MAX_GAS_PRICE -> The maximum price you can spend on each unit of gas, for example, you are willing to 
-spend up to 0.1BNB of gas, so MARKETPLACE_MAX_GAS_PRICE = (0.1BNB / 10^-9 * MARKETPLACE_BUY_GAS). An example with 
-MARKETPLACE_BUY_GAS at 240000 and a max gas of 0.1BNB, the MARKETPLACE_MAX_GAS_PRICE will be 416.
-  * MARKETPLACE_MIN_GAS_PRICE: -> The minimum price you can spend on each unit of gas, 7 gwei is a fair value.
-  * MARKETPLACE_PROFIT_TO_GAS_RATIO: -> // Percentage of the profit that could be used as gas, due to bot competition it's usually around 75%.
-  * BATTLE_WIN_RATE -> The win percentage that will be used to calculate the sale price.
-  * MIN_THETAN_PRICE_WBNB -> The minimum price the bot will consider to buy a character, on WBNB.
-  * MAX_THETAN_PRICE_WBNB -> The maximum price the bot will consider to buy a character, in WBNB.
-
+There are the more configs that I recommend tweaking, check the [configs file](./src/configs.ts) for more details.
 
 ### Tips
 
@@ -92,7 +83,7 @@ characters faster. I used an EC2 from Amazon AWS at the us-east-1 location.
 ### Features
 
 * Watch the marketplace for good opportunities 
-* Automatically buy new and cheap thetans from marketplace
+* Automatically buy and rent new and cheap thetans from marketplace
 * Automatically buy BNB for gas fees when the balance is low
 * Dinamically estimate gas fee for each transaction based on the possible profit
 * Fast (become even faster if you put it on a US server), it does not miss a block.
@@ -184,8 +175,7 @@ Install Thetan Arena Sniper in EC2 Server:
 
 * Run:
   ```sh
-  # pm2 start ./dist/main.js -- <Earn expect percentage (example: 0.3)>
-  pm2 start ./dist/main.js -- 0.3
+  pm2 start ./dist/main.js
   ```
 
 * Monitor:
