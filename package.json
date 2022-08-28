@@ -10,7 +10,6 @@
   "description": "Rent the best thetan from Thetan Arena Rental Market",
   "main": "./dist/main.js",
   "scripts": {
-    "dev": "ts-node-dev ./src/main.ts",
     "prod": "node dist/main.js",
     "build": "rimraf dist && tsc -p . && cp ./package.prod.json ./dist/package.json && cp ./.env.example ./dist/.env"
   },
