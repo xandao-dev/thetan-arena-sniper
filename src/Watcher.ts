@@ -4,7 +4,7 @@ import { clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async';
 abstract class Watcher {
 	private fetchInterval: number;
 	private started: boolean = false;
-	private intervalTimer?: SetIntervalAsyncTimer;
+	private intervalTimer?: SetIntervalAsyncTimer<unknown[]>;
 	constructor(fetchIntervalMs: number) {
 		this.fetchInterval = fetchIntervalMs;
 	}

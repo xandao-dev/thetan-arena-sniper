@@ -37,9 +37,9 @@ class Wallet {
 		this.web3.eth.accounts.wallet.add(account);
 		this.address = account.address;
 		this.privateKey = account.privateKey;
-		this.wbnbContract = new web3.eth.Contract(WBNB_ABI, WBNB_CONTRACT_ADDRESS);
-		this.pancakeRouterContract = new web3.eth.Contract(PANCAKE_ROUTER_ABI, PANCAKE_ROUTER_ADDRESS);
-		this.thcContract = new web3.eth.Contract(THETAN_COIN_ABI, THETAN_COIN_CONTRACT_ADDRESS);
+		this.wbnbContract = new web3.eth.Contract(WBNB_ABI, WBNB_CONTRACT_ADDRESS) as unknown as Contract;
+		this.pancakeRouterContract = new web3.eth.Contract(PANCAKE_ROUTER_ABI, PANCAKE_ROUTER_ADDRESS) as unknown as Contract;
+		this.thcContract = new web3.eth.Contract(THETAN_COIN_ABI, THETAN_COIN_CONTRACT_ADDRESS) as unknown as Contract;
 	}
 
 	public async getBalance(coin: Coin): Promise<number> {

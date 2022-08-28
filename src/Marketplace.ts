@@ -31,7 +31,7 @@ class Marketplace {
 	private coinWatcher: CoinWatcher;
 	private web3: Web3;
 	private bearer?: string;
-	private connectIntervalTimer?: SetIntervalAsyncTimer;
+	private connectIntervalTimer?: SetIntervalAsyncTimer<unknown[]>;
 	private connected: boolean = false;
 	private thetanContract: Contract;
 	private rentalHeroContract: Contract;
@@ -49,8 +49,8 @@ class Marketplace {
 		this.web3 = web3;
 		this.wallet = wallet;
 		this.coinWatcher = coinWatcher;
-		this.thetanContract = new web3.eth.Contract(MARKETPLACE_ABI, MARKETPLACE_CONTRACT_ADDRESS);
-		this.rentalHeroContract = new web3.eth.Contract(RENTAL_HERO_ABI, RENTAL_HERO_CONTRACT_ADDRESS);
+		this.thetanContract = new web3.eth.Contract(MARKETPLACE_ABI, MARKETPLACE_CONTRACT_ADDRESS) as unknown as Contract;
+		this.rentalHeroContract = new web3.eth.Contract(RENTAL_HERO_ABI, RENTAL_HERO_CONTRACT_ADDRESS) as unknown as Contract;
 	}
 
 	public async connect(): Promise<void> {

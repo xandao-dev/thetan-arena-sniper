@@ -1,8 +1,9 @@
+import { AbiItem } from 'web3-utils';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const THETAN_HERO_CONTRACT_ADDRESS: string = '0x98eb46cbf76b19824105dfbcfa80ea8ed020c6f4';
-const THETAN_HERO_ABI: any[] = [
+const THETAN_HERO_ABI: AbiItem[] = [
 	{ inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
 	{
 		anonymous: false,
@@ -245,7 +246,13 @@ const THETAN_HERO_ABI: any[] = [
 		stateMutability: 'nonpayable',
 		type: 'function',
 	},
-	{ inputs: [], name: 'renounceOwnership', outputs: [], stateMutability: 'nonpayable', type: 'function' },
+	{
+		inputs: [],
+		name: 'renounceOwnership',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
 	{
 		inputs: [
 			{ internalType: 'bytes32', name: 'role', type: 'bytes32' },
@@ -386,7 +393,7 @@ const THETAN_HERO_ABI: any[] = [
 ];
 
 const RENTAL_HERO_CONTRACT_ADDRESS: string = '0xBd69AbdCC8aCDAfcA69C96e10141F573842B40e4';
-const RENTAL_HERO_ABI: any[] = [
+const RENTAL_HERO_ABI: AbiItem[] = [
 	{
 		anonymous: false,
 		inputs: [{ indexed: false, internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
@@ -458,7 +465,13 @@ const RENTAL_HERO_ABI: any[] = [
 		stateMutability: 'view',
 		type: 'function',
 	},
-	{ inputs: [], name: 'renounceOwnership', outputs: [], stateMutability: 'nonpayable', type: 'function' },
+	{
+		inputs: [],
+		name: 'renounceOwnership',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
 	{
 		inputs: [
 			{ internalType: 'address[3]', name: 'addresses', type: 'address[3]' },
@@ -518,10 +531,146 @@ const RENTAL_HERO_ABI: any[] = [
 ];
 
 const MARKETPLACE_CONTRACT_ADDRESS: string = '0x7Bf5D1dec7e36d5B4e9097B48A1B9771e6c96AA4';
-const MARKETPLACE_ABI: any[] = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"address","name":"contractAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"price","type":"uint256"},{"indexed":false,"internalType":"address","name":"paymentToken","type":"address"},{"indexed":false,"internalType":"address","name":"seller","type":"address"},{"indexed":false,"internalType":"address","name":"buyer","type":"address"},{"indexed":false,"internalType":"uint256","name":"fee","type":"uint256"}],"name":"MatchTransaction","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[],"name":"feeToAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_nftAddress","type":"address"},{"internalType":"uint256","name":"_tokenId","type":"uint256"},{"internalType":"address","name":"_paymentErc20","type":"address"},{"internalType":"uint256","name":"_price","type":"uint256"},{"internalType":"uint256","name":"_saltNonce","type":"uint256"}],"name":"getMessageHash","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"address[2]","name":"addresses","type":"address[2]"},{"internalType":"uint256[3]","name":"values","type":"uint256[3]"},{"internalType":"bytes","name":"signature","type":"bytes"}],"name":"ignoreSignature","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address[3]","name":"addresses","type":"address[3]"},{"internalType":"uint256[3]","name":"values","type":"uint256[3]"},{"internalType":"bytes","name":"signature","type":"bytes"}],"name":"matchTransaction","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"paymentTokens","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"_removedPaymentTokens","type":"address[]"}],"name":"removePaymentTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_feeToAddress","type":"address"}],"name":"setFeeToAddress","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address[]","name":"_paymentTokens","type":"address[]"}],"name":"setPaymentTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_transactionFee","type":"uint256"}],"name":"setTransactionFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"transactionFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes","name":"","type":"bytes"}],"name":"usedSignatures","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}];
+const MARKETPLACE_ABI: AbiItem[] = [
+	{
+		anonymous: false,
+		inputs: [
+			{ indexed: true, internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+			{ indexed: false, internalType: 'address', name: 'contractAddress', type: 'address' },
+			{ indexed: false, internalType: 'uint256', name: 'price', type: 'uint256' },
+			{ indexed: false, internalType: 'address', name: 'paymentToken', type: 'address' },
+			{ indexed: false, internalType: 'address', name: 'seller', type: 'address' },
+			{ indexed: false, internalType: 'address', name: 'buyer', type: 'address' },
+			{ indexed: false, internalType: 'uint256', name: 'fee', type: 'uint256' },
+		],
+		name: 'MatchTransaction',
+		type: 'event',
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{ indexed: true, internalType: 'address', name: 'previousOwner', type: 'address' },
+			{ indexed: true, internalType: 'address', name: 'newOwner', type: 'address' },
+		],
+		name: 'OwnershipTransferred',
+		type: 'event',
+	},
+	{
+		inputs: [],
+		name: 'feeToAddress',
+		outputs: [{ internalType: 'address', name: '', type: 'address' }],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
+		inputs: [
+			{ internalType: 'address', name: '_nftAddress', type: 'address' },
+			{ internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+			{ internalType: 'address', name: '_paymentErc20', type: 'address' },
+			{ internalType: 'uint256', name: '_price', type: 'uint256' },
+			{ internalType: 'uint256', name: '_saltNonce', type: 'uint256' },
+		],
+		name: 'getMessageHash',
+		outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+		stateMutability: 'pure',
+		type: 'function',
+	},
+	{
+		inputs: [
+			{ internalType: 'address[2]', name: 'addresses', type: 'address[2]' },
+			{ internalType: 'uint256[3]', name: 'values', type: 'uint256[3]' },
+			{ internalType: 'bytes', name: 'signature', type: 'bytes' },
+		],
+		name: 'ignoreSignature',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [
+			{ internalType: 'address[3]', name: 'addresses', type: 'address[3]' },
+			{ internalType: 'uint256[3]', name: 'values', type: 'uint256[3]' },
+			{ internalType: 'bytes', name: 'signature', type: 'bytes' },
+		],
+		name: 'matchTransaction',
+		outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [],
+		name: 'owner',
+		outputs: [{ internalType: 'address', name: '', type: 'address' }],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'address', name: '', type: 'address' }],
+		name: 'paymentTokens',
+		outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'address[]', name: '_removedPaymentTokens', type: 'address[]' }],
+		name: 'removePaymentTokens',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [],
+		name: 'renounceOwnership',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'address', name: '_feeToAddress', type: 'address' }],
+		name: 'setFeeToAddress',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'address[]', name: '_paymentTokens', type: 'address[]' }],
+		name: 'setPaymentTokens',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'uint256', name: '_transactionFee', type: 'uint256' }],
+		name: 'setTransactionFee',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [],
+		name: 'transactionFee',
+		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+		stateMutability: 'view',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
+		name: 'transferOwnership',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
+	{
+		inputs: [{ internalType: 'bytes', name: '', type: 'bytes' }],
+		name: 'usedSignatures',
+		outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+		stateMutability: 'view',
+		type: 'function',
+	},
+];
 
 const THETAN_COIN_CONTRACT_ADDRESS: string = '0x24802247bd157d771b7effa205237d8e9269ba8a';
-const THETAN_COIN_ABI: any[] = [
+const THETAN_COIN_ABI: AbiItem[] = [
 	{ inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
 	{
 		anonymous: false,
@@ -769,7 +918,13 @@ const THETAN_COIN_ABI: any[] = [
 		stateMutability: 'view',
 		type: 'function',
 	},
-	{ inputs: [], name: 'renounceOwnership', outputs: [], stateMutability: 'nonpayable', type: 'function' },
+	{
+		inputs: [],
+		name: 'renounceOwnership',
+		outputs: [],
+		stateMutability: 'nonpayable',
+		type: 'function',
+	},
 	{
 		inputs: [
 			{ internalType: 'bytes32', name: 'role', type: 'bytes32' },
@@ -843,7 +998,7 @@ const THETAN_COIN_ABI: any[] = [
 ];
 
 let WBNB_CONTRACT_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
-const WBNB_ABI: any[] = [
+const WBNB_ABI: AbiItem[] = [
 	{
 		constant: true,
 		inputs: [],
@@ -998,7 +1153,7 @@ const WBNB_ABI: any[] = [
 ];
 
 const PANCAKE_ROUTER_ADDRESS = '0x10ed43c718714eb63d5aa57b78b54704e256024e';
-const PANCAKE_ROUTER_ABI: any[] = [
+const PANCAKE_ROUTER_ABI: AbiItem[] = [
 	{
 		inputs: [
 			{ internalType: 'address', name: '_factory', type: 'address' },
@@ -1336,7 +1491,7 @@ const PANCAKE_ROUTER_ABI: any[] = [
 		stateMutability: 'nonpayable',
 		type: 'function',
 	},
-	{ stateMutability: 'payable', type: 'receive' },
+	{ stateMutability: 'payable', type: 'event' },
 ];
 
 export {
