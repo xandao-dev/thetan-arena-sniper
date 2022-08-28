@@ -5,6 +5,7 @@
     Thetan Arena Sniper is a tool to buy cheap thetans NFTs quickly. It interacts with BSC Blockchain to buy thetans as fast as possible.
     <br />
     :warning: I'ts not working, the contracts has been updated :warning:
+    <br />
     :warning: I am not responsible for financial losses. :warning:
     <br />
     <br />
